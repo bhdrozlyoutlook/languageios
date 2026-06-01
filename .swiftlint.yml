@@ -1,0 +1,51 @@
+# SwiftLint config tuned to the existing codebase style.
+# Run: swiftlint   (lint)  /  swiftlint --fix  (autocorrect)
+
+included:
+  - Sources
+  - Tests
+  - App
+excluded:
+  - .build
+  - .swiftpm
+  - LanguageIOS.xcodeproj
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - sorted_first_last
+  - closure_spacing
+
+line_length:
+  warning: 120
+  error: 170
+  ignores_comments: true
+
+# Short identifiers are used intentionally (GeometryReader w/h, loop indices, SVG/Canvas math).
+identifier_name:
+  excludes:
+    - id
+    - x
+    - y
+    - w
+    - h
+    - i
+    - c
+    - p
+
+# Large SwiftUI view files (OnboardingView ~1200 lines, LearningPathView) are expected.
+type_body_length:
+  warning: 600
+  error: 900
+file_length:
+  warning: 800
+  error: 1400
+function_body_length:
+  warning: 80
+  error: 140
+
+# The journey catalog is one big switch by design.
+cyclomatic_complexity:
+  warning: 20
+  error: 30

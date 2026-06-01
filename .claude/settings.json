@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(swift build *)",
+      "Bash(swift test *)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(xcodebuild -scheme LanguageIOS -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/lios-ddata build)",
+      "Bash(xcodebuild -list)",
+      "Bash(xcodebuild -scheme LanguageIOSApp -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/lios-ddata build)",
+      "Bash(grep -c \"FlagKit\" /tmp/lios-ddata/Build/Intermediates.noindex/LanguageIOSApp.build/Debug-iphonesimulator/LanguageIOSApp.build/Objects-normal/*/OnboardingComponents.o.d 2>/dev/null | head -3; echo \"---\"; ls /tmp/lios-ddata/Build/Products/Debug-iphonesimulator/PackageFrameworks/ 2>/dev/null)",
+      "Read(//tmp/lios-ddata/Build/Intermediates.noindex/LanguageIOSApp.build/Debug-iphonesimulator/LanguageIOSApp.build/**)",
+      "Read(//tmp/lios-ddata/Build/Products/Debug-iphonesimulator/**)",
+      "Bash(find /tmp/lios-ddata/Build -name \"FlagKit*\" 2>/dev/null | head -10)",
+      "Read(//private/tmp/lios-ddata/Build/**)",
+      "Bash(xcodegen --version)",
+      "Bash(xcodegen generate *)",
+      "Bash(rm -rf /tmp/lios-ddata && xcodebuild -scheme LanguageIOSApp -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/lios-ddata build 2>&1 | tail -20)",
+      "Bash(nm /tmp/lios-ddata/Build/Products/Debug-iphonesimulator/LanguageIOS.app/LanguageIOS)",
+      "Bash(nm /tmp/lios-ddata/Build/Products/Debug-iphonesimulator/LanguageIOS.app/LanguageIOS.debug.dylib)",
+      "Bash(xcrun simctl *)",
+      "Bash(xcodebuild -scheme LanguageIOSApp -destination 'platform=iOS Simulator,id=9160EDCD-5613-4223-869B-2E68F5DA66A0' -derivedDataPath /tmp/lios-ddata build)",
+      "Read(//tmp/**)",
+      "Bash(xcodebuild -project LanguageIOS.xcodeproj -scheme LanguageIOSApp -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath /private/tmp/lios-ddata/Build build)",
+      "Bash(swift Scripts/generate_placeholder_assets.swift)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/lios-ddata"
+    ]
+  }
+}

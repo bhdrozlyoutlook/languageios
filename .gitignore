@@ -1,0 +1,21 @@
+# Swift / SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcscmblueprint
+*.xccheckout
+
+# XcodeGen output (regenerated from project.yml)
+LanguageIOS.xcodeproj/
+
+# Build/data scratch
+/tmp/lios-ddata
+.xcodebuildmcp/
+
+# macOS
+.DS_Store
