@@ -22,7 +22,8 @@
       "Bash(xcodebuild -scheme LanguageIOSApp -destination 'platform=iOS Simulator,id=9160EDCD-5613-4223-869B-2E68F5DA66A0' -derivedDataPath /tmp/lios-ddata build)",
       "Read(//tmp/**)",
       "Bash(xcodebuild -project LanguageIOS.xcodeproj -scheme LanguageIOSApp -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath /private/tmp/lios-ddata/Build build)",
-      "Bash(swift Scripts/generate_placeholder_assets.swift)"
+      "Bash(swift Scripts/generate_placeholder_assets.swift)",
+      "Bash(git commit *)"
     ],
     "additionalDirectories": [
       "/private/tmp/lios-ddata"

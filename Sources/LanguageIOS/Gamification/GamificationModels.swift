@@ -73,6 +73,13 @@ public struct GamificationState: Codable, Equatable {
         updateStreak(now: now, calendar: calendar)
     }
 
+    /// A practice/review session: awards XP and keeps the streak alive, but does not
+    /// touch per-stop stars.
+    public mutating func recordPractice(xpGain: Int, now: Date, calendar: Calendar = .current) {
+        xp += max(0, xpGain)
+        updateStreak(now: now, calendar: calendar)
+    }
+
     private mutating func updateStreak(now: Date, calendar: Calendar) {
         let today = calendar.startOfDay(for: now)
         guard let previous = lastActiveDate.map({ calendar.startOfDay(for: $0) }) else {

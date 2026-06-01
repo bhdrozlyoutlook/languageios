@@ -83,3 +83,7 @@ public struct Lesson: Equatable {
 
     public var gradedCount: Int { exercises.filter(\.isGraded).count }
 }
+
+extension Lesson: Identifiable {
+    public var id: String { stopId }
+}

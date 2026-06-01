@@ -9,9 +9,20 @@ public struct LearningPathView: View {
     private let journey: LearningJourney
 
     @Environment(\.appEnvironment) private var env
-    @State private var presentedStop: LearningStop?
+    @State private var activeLesson: ActiveLesson?
     @State private var showNoHearts = false
     @State private var showProfile = false
+
+    private enum ActiveLesson: Identifiable {
+        case stop(LearningStop)
+        case review(Lesson)
+        var id: String {
+            switch self {
+            case .stop(let stop): "stop_\(stop.id)"
+            case .review(let lesson): "review_\(lesson.stopId)"
+            }
+        }
+    }
 
     public init(language: TargetLanguage, store: AppStore) {
         self.language = language
@@ -30,6 +41,7 @@ public struct LearningPathView: View {
                 pathScroll(progress: progress)
             }
         }
+        .overlay(alignment: .bottom) { practiceButton(progress: progress) }
         .onAppear {
             env.analytics.track(
                 LearningPathAnalytics.mapViewed(
@@ -40,9 +52,9 @@ public struct LearningPathView: View {
             )
         }
         #if os(iOS)
-        .fullScreenCover(item: $presentedStop) { stop in lessonView(for: stop) }
+        .fullScreenCover(item: $activeLesson) { lessonHost(for: $0) }
         #else
-        .sheet(item: $presentedStop) { stop in lessonView(for: stop) }
+        .sheet(item: $activeLesson) { lessonHost(for: $0) }
         #endif
         .alert("Canların bitti", isPresented: $showNoHearts) {
             Button("Tamam", role: .cancel) {}
@@ -76,21 +88,60 @@ public struct LearningPathView: View {
         return "Birazdan canların yenilenecek."
     }
 
-    private func lessonView(for stop: LearningStop) -> some View {
-        LessonView(
-            lesson: LessonBuilder.build(for: stop, language: language),
-            analytics: env.analytics,
-            speech: env.speech,
-            onPassed: { stars in
-                store.recordLessonPassed(stopId: stop.id, stars: stars)
-                presentedStop = nil
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
-                    store.completeCurrentStop(for: language, total: journey.stopCount)
+    @ViewBuilder
+    private func lessonHost(for active: ActiveLesson) -> some View {
+        switch active {
+        case .stop(let stop):
+            LessonView(
+                lesson: LessonBuilder.build(for: stop, language: language),
+                analytics: env.analytics,
+                speech: env.speech,
+                onPassed: { stars in
+                    store.recordLessonPassed(stopId: stop.id, stars: stars)
+                    activeLesson = nil
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
+                        store.completeCurrentStop(for: language, total: journey.stopCount)
+                    }
+                },
+                onFailed: { store.recordLessonFailed() },
+                onClose: { activeLesson = nil }
+            )
+        case .review(let lesson):
+            LessonView(
+                lesson: lesson,
+                analytics: env.analytics,
+                speech: env.speech,
+                onPassed: { stars in
+                    store.recordPracticeCompleted(stars: stars)
+                    activeLesson = nil
+                },
+                onFailed: {},
+                onClose: { activeLesson = nil }
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func practiceButton(progress: LearningProgress) -> some View {
+        if progress.completedCount > 0 {
+            Button {
+                let completed = Array(journey.stops.prefix(progress.completedCount))
+                if let lesson = LessonBuilder.review(language: language, completedStops: completed) {
+                    activeLesson = .review(lesson)
                 }
-            },
-            onFailed: { store.recordLessonFailed() },
-            onClose: { presentedStop = nil }
-        )
+            } label: {
+                Label("Pratik yap", systemImage: "arrow.triangle.2.circlepath")
+                    .font(.headline.bold())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 22)
+                    .padding(.vertical, 14)
+                    .background(Capsule().fill(MapTheme.teal))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.6), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.22), radius: 8, y: 4)
+            }
+            .buttonStyle(.plain)
+            .padding(.bottom, 26)
+        }
     }
 
     // MARK: Header
@@ -229,7 +280,7 @@ public struct LearningPathView: View {
                 ) { index in
                     guard index < journey.stops.count else { return }
                     if store.canStartLesson() {
-                        presentedStop = journey.stops[index]
+                        activeLesson = .stop(journey.stops[index])
                     } else {
                         showNoHearts = true
                     }

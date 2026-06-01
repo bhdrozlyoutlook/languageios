@@ -128,6 +128,25 @@ public final class AppStore {
     public var completedStopCount: Int { progressByLanguage.values.reduce(0) { $0 + $1.completedCount } }
     public func userProfile() -> UserProfile? { profiles.loadProfile() }
 
+    public func completedStopCount(for language: TargetLanguage) -> Int {
+        progress(for: language).completedCount
+    }
+
+    /// Records a finished practice/review session: awards XP and extends the streak.
+    /// Unlike a lesson, it has no heart cost and no stop completion.
+    public func recordPracticeCompleted(stars: Int) {
+        let xpGain = 5 + 5 * max(0, stars)
+        let previousStreak = gamification.streak
+        gamification.recordPractice(xpGain: xpGain, now: Date())
+        persistGamification()
+        analytics.track(GamificationAnalytics.xpEarned(amount: xpGain, total: gamification.xp))
+        if gamification.streak > previousStreak {
+            analytics.track(GamificationAnalytics.streakExtended(days: gamification.streak))
+        }
+        notifications.cancelHeartRefill()
+        rescheduleStreakReminder()
+    }
+
     /// Switches the active learning language; the home map re-renders for it.
     public func setTargetLanguage(_ language: TargetLanguage) {
         guard language != targetLanguage else { return }
