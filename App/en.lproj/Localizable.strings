@@ -1,0 +1,23 @@
+/* English localization. Keys are the Turkish base strings used in localized Text / LocalizedStringKey. */
+
+/* Onboarding */
+"Dil öğrenmeyi hayatına taşı" = "Bring language learning into your life";
+"Gördüğün objelerden, dinlediğin şarkılardan ve konuşma pratiğinden sana özel dersler oluştur." = "Create personalized lessons from the objects you see, the songs you hear, and speaking practice.";
+"Devam et" = "Continue";
+"Planımı kaydet" = "Save my plan";
+
+/* Lessons */
+"Yeni kelime" = "New word";
+"Anladım" = "Got it";
+"Devam" = "Next";
+"Kontrol Et" = "Check";
+"Tekrar dene" = "Try again";
+"Kaydet" = "Save";
+
+/* Object labeling */
+"Objeleri öğren" = "Learn objects";
+"Fotoğraf seç" = "Choose a photo";
+
+/* Map / profile */
+"Profil" = "Profile";
+"Pratik yap" = "Practice";

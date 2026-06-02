@@ -157,7 +157,7 @@ struct OnboardingOptionCard: View {
 }
 
 struct OnboardingPrimaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let isEnabled: Bool
     let action: () -> Void
 

@@ -219,7 +219,7 @@ struct CheckFooter: View {
 }
 
 struct LessonActionButton: View {
-    let title: String
+    let title: LocalizedStringKey
     var tint: Color = OnboardingTheme.ink
     var isEnabled: Bool = true
     let action: () -> Void
