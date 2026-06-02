@@ -93,9 +93,10 @@ final class GeminiTests: XCTestCase {
         XCTAssertTrue(Secrets.value(for: "DEFINITELY_UNSET_KEY_XYZ").isEmpty)
     }
 
-    func testTargetLanguageEnglishNames() {
+    func testTargetLanguageEnglishNamesDistinguishRegion() {
         XCTAssertEqual(TargetLanguage.german.englishName, "German")
-        XCTAssertEqual(TargetLanguage.englishUK.englishName, "English")
+        XCTAssertEqual(TargetLanguage.englishUS.englishName, "American English")
+        XCTAssertEqual(TargetLanguage.englishUK.englishName, "British English")
         XCTAssertEqual(TargetLanguage.french.englishName, "French")
     }
 }

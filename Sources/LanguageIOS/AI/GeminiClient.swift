@@ -19,7 +19,7 @@ public final class GeminiClient {
 
     public init(
         apiKey: String,
-        model: String = "gemini-2.0-flash",
+        model: String = "gemini-1.5-flash",
         session: URLSession = .shared
     ) {
         self.apiKey = apiKey

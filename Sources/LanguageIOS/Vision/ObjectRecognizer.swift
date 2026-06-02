@@ -66,15 +66,15 @@ public final class GeminiObjectRecognizer: ObjectRecognizing {
 
     static func prompt(target: TargetLanguage, native: TargetLanguage) -> String {
         """
-        This image is a centred crop from a camera viewfinder. Identify the ONE physical \
-        object at the centre of the frame that the user is pointing at — it may be small or \
-        far away. Ignore the background, the surface it rests on, and other objects around \
-        the edges. Teach it to a \(native.englishName) speaker learning \(target.englishName).
+        Identify the single main physical object in this photo. It may have been cut out \
+        and placed on a plain white background — if so, name that object. Otherwise pick the \
+        most prominent object near the centre and ignore the background and surroundings. \
+        Teach it to a \(native.englishName) speaker learning \(target.englishName).
         Respond ONLY with a JSON object, no markdown, using lowercase singular nouns:
-        {"word": "<centre object's name in \(target.englishName)>", \
-        "english": "<centre object's name in English>", \
-        "native": "<centre object's name in \(native.englishName)>"}
-        If there is no clear object in the centre, respond {"word": ""}.
+        {"word": "<object's name in \(target.englishName)>", \
+        "english": "<object's name in English>", \
+        "native": "<object's name in \(native.englishName)>"}
+        If there is no clear object, respond {"word": ""}.
         """
     }
 
@@ -101,10 +101,13 @@ public final class GeminiObjectRecognizer: ObjectRecognizing {
 }
 
 extension TargetLanguage {
-    /// English-language name of the language, for building model prompts.
+    /// English-language name of the language for model prompts. Distinguishes American vs
+    /// British English so recognized words use the right regional vocabulary (e.g.
+    /// "elevator" vs "lift", "trunk" vs "boot").
     var englishName: String {
         switch self {
-        case .englishUK, .englishUS: "English"
+        case .englishUS: "American English"
+        case .englishUK: "British English"
         case .turkish: "Turkish"
         case .german: "German"
         case .spanish: "Spanish"

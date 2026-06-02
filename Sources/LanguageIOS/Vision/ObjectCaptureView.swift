@@ -397,10 +397,13 @@ public struct ObjectCaptureView: View {
         // (no multi-megapixel upload to Gemini / mask on a huge image).
         let data = ImageNormalizer.prepared(rawData)
         withAnimation(.easeInOut(duration: 0.25)) { phase = .processing(data) }
-        async let cutoutTask = extractor.extractSubject(from: data)
-        async let recognitionTask = recognizer.recognize(data, target: language, native: native)
-        let cutout = await cutoutTask
-        let recognition = await recognitionTask
+
+        // Lift the subject first, then recognize the background-removed cutout when we got
+        // one: Gemini then sees only the framed object, not the surrounding scene (which
+        // let a background/side object win). Fall back to the full frame if no cutout.
+        let cutout = await extractor.extractSubject(from: data)
+        let recognitionInput = cutout.map(ImageNormalizer.onWhite) ?? data
+        let recognition = await recognizer.recognize(recognitionInput, target: language, native: native)
         if let recognition {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
                 phase = .result(CaptureResult(
