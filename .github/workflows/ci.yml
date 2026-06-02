@@ -23,7 +23,7 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build iOS app (simulator)
+      - name: Build & UI-test iOS app (simulator)
         run: >
           xcodebuild
           -project LanguageIOS.xcodeproj
@@ -31,7 +31,7 @@ jobs:
           -configuration Debug
           -destination 'platform=iOS Simulator,name=iPhone 16'
           -derivedDataPath build
-          build
+          test
 
   lint:
     runs-on: macos-14

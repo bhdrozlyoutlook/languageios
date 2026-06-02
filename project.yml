@@ -41,12 +41,27 @@ targets:
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
+  LanguageIOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: LanguageIOSApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bhdrozly.languageios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   LanguageIOSApp:
     build:
       targets:
         LanguageIOSApp: all
+        LanguageIOSUITests: [test]
     run:
       config: Debug
     test:
       config: Debug
+      targets:
+        - LanguageIOSUITests
