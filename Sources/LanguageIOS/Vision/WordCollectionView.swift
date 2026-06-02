@@ -9,6 +9,8 @@ public struct WordCollectionView: View {
     private let onCapture: () -> Void
 
     @State private var objects: [CapturedObject] = []
+    /// Cutout PNGs read from disk once on appear, not per-tile per-scroll-frame.
+    @State private var imageData: [String: Data] = [:]
 
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
 
@@ -48,7 +50,14 @@ public struct WordCollectionView: View {
                 }
             }
         }
-        .onAppear { objects = store.capturedObjects() }
+        .onAppear {
+            objects = store.capturedObjects()
+            imageData = Dictionary(uniqueKeysWithValues:
+                objects.compactMap { object in
+                    store.captureImage(forID: object.id).map { (object.id, $0) }
+                }
+            )
+        }
     }
 
     private var header: some View {
@@ -106,7 +115,7 @@ public struct WordCollectionView: View {
             speech.speak(item.english, language: item.language)
         } label: {
             VStack(spacing: 8) {
-                CutoutSticker(imageData: store.captureImage(forID: item.id), cornerRadius: 18)
+                CutoutSticker(imageData: imageData[item.id], cornerRadius: 18)
                     .frame(height: 130)
                 Text(item.english)
                     .font(.subheadline.bold())

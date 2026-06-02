@@ -62,20 +62,27 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
             status = .ready
             return
         }
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
-            ?? AVCaptureDevice.default(for: .video),
-            let input = try? AVCaptureDeviceInput(device: device) else {
-            status = .unavailable
-            return
+        // Device discovery + session configuration are expensive and were blocking the
+        // main thread (janky camera-sheet open). Do all of it on the serial queue and
+        // only hop back to the main actor to publish `status`.
+        queue.async { [weak self, session, output] in
+            guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+                ?? AVCaptureDevice.default(for: .video),
+                let input = try? AVCaptureDeviceInput(device: device) else {
+                Task { @MainActor in self?.status = .unavailable }
+                return
+            }
+            session.beginConfiguration()
+            session.sessionPreset = .photo
+            if session.canAddInput(input) { session.addInput(input) }
+            if session.canAddOutput(output) { session.addOutput(output) }
+            session.commitConfiguration()
+            session.startRunning()
+            Task { @MainActor in
+                self?.configured = true
+                self?.status = .ready
+            }
         }
-        session.beginConfiguration()
-        session.sessionPreset = .photo
-        if session.canAddInput(input) { session.addInput(input) }
-        if session.canAddOutput(output) { session.addOutput(output) }
-        session.commitConfiguration()
-        configured = true
-        queue.async { [session] in session.startRunning() }
-        status = .ready
     }
 
     nonisolated func photoOutput(

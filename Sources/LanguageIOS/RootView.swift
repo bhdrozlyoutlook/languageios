@@ -5,6 +5,7 @@ import SwiftUI
 /// onboarding vs. learning-path home, and surfaces persistence errors.
 public struct RootView: View {
     @State private var store: AppStore
+    @State private var showSplash = true
     private let environment: AppEnvironment
 
     /// Defaults to `.preview()` so `#Preview` and tests can use `RootView()`.
@@ -14,21 +15,33 @@ public struct RootView: View {
     }
 
     public var body: some View {
-        content
-            .environment(\.appEnvironment, environment)
-            .onAppear { environment.crashReporter.recordBreadcrumb("app launched", category: .app) }
-            .alert(
-                "Hata",
-                isPresented: Binding(
-                    get: { store.lastError != nil },
-                    set: { if !$0 { store.clearError() } }
-                ),
-                presenting: store.lastError
-            ) { _ in
-                Button("Tamam", role: .cancel) { store.clearError() }
-            } message: { error in
-                Text(error.userMessage)
+        ZStack {
+            content
+            if showSplash {
+                SplashView()
+                    .transition(.opacity)
+                    .zIndex(1)
             }
+        }
+        .task {
+            // Brief branded splash that masks first-frame setup, then fades to content.
+            try? await Task.sleep(nanoseconds: 750_000_000)
+            withAnimation(.easeOut(duration: 0.45)) { showSplash = false }
+        }
+        .environment(\.appEnvironment, environment)
+        .onAppear { environment.crashReporter.recordBreadcrumb("app launched", category: .app) }
+        .alert(
+            "Hata",
+            isPresented: Binding(
+                get: { store.lastError != nil },
+                set: { if !$0 { store.clearError() } }
+            ),
+            presenting: store.lastError
+        ) { _ in
+            Button("Tamam", role: .cancel) { store.clearError() }
+        } message: { error in
+            Text(error.userMessage)
+        }
     }
 
     @ViewBuilder

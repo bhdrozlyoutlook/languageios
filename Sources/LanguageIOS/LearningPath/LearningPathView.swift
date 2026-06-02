@@ -33,11 +33,18 @@ public struct LearningPathView: View {
         self.journey = LearningJourney.journey(for: language)
     }
 
+    /// True while any sheet / full-screen cover is presented over the map.
+    private var isCovered: Bool {
+        activeLesson != nil || showProfile || showObjects || showCollection || showAI || showNoHearts
+    }
+
     public var body: some View {
         let progress = store.progress(for: language)
 
         ZStack(alignment: .top) {
-            SeaBackground().ignoresSafeArea()
+            // Pause the per-frame sea decorations while a sheet/cover is up, so they don't
+            // compete with the presentation transition (kept the map janky).
+            SeaBackground(paused: isCovered).ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header(progress: progress)
@@ -382,9 +389,9 @@ private struct JourneyPathLayout: View {
     var body: some View {
         GeometryReader { geo in
             let width = geo.size.width
-            // Real VStack rows (not .offset) so each stop's layout position is correct
-            // and `ScrollViewReader.scrollTo(index:)` can jump to the active stop.
-            VStack(spacing: 0) {
+            // Lazy rows so only on-screen stops are realized (the journey has up to 50
+            // states). Fixed row height keeps layout + `scrollTo(index:)` correct.
+            LazyVStack(spacing: 0) {
                 ForEach(Array(journey.stops.enumerated()), id: \.element.id) { index, stop in
                     StopNodeView(
                         stop: stop,
@@ -473,6 +480,8 @@ private struct JourneyTrail: View {
 /// and leaping dolphins. Purely decorative — sits behind the scrolling path, never
 /// intercepts taps. Each element is procedural so it works before real art is added.
 private struct SeaBackground: View {
+    var paused: Bool = false
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
@@ -494,21 +503,21 @@ private struct SeaBackground: View {
                 }
 
                 // Clouds drifting across the sky.
-                DriftingCloud(size: 78, opacity: 0.85, amplitude: 26, duration: 19)
+                DriftingCloud(size: 78, opacity: 0.85, amplitude: 26, duration: 19, paused: paused)
                     .position(x: w * 0.26, y: h * 0.16)
-                DriftingCloud(size: 56, opacity: 0.7, amplitude: 22, duration: 24)
+                DriftingCloud(size: 56, opacity: 0.7, amplitude: 22, duration: 24, paused: paused)
                     .position(x: w * 0.8, y: h * 0.11)
-                DriftingCloud(size: 46, opacity: 0.6, amplitude: 18, duration: 15)
+                DriftingCloud(size: 46, opacity: 0.6, amplitude: 18, duration: 15, paused: paused)
                     .position(x: w * 0.62, y: h * 0.23)
 
                 // Dolphins leaping out of the water.
-                LeapingDolphin(size: 64, duration: 3.0, delay: 0.0)
+                LeapingDolphin(size: 64, duration: 3.0, delay: 0.0, paused: paused)
                     .position(x: w * 0.2, y: h * 0.6)
-                LeapingDolphin(size: 46, duration: 3.7, delay: 1.4)
+                LeapingDolphin(size: 46, duration: 3.7, delay: 1.4, paused: paused)
                     .position(x: w * 0.84, y: h * 0.82)
 
                 // A sailboat bobbing on the waves.
-                SailboatView()
+                SailboatView(paused: paused)
                     .frame(width: 66, height: 62)
                     .position(x: w * 0.73, y: h * 0.47)
             }
@@ -524,6 +533,7 @@ private struct DriftingCloud: View {
     let opacity: Double
     let amplitude: CGFloat
     let duration: Double
+    var paused: Bool = false
 
     @State private var drift = false
 
@@ -533,17 +543,23 @@ private struct DriftingCloud: View {
             .scaledToFit()
             .frame(width: size)
             .foregroundStyle(.white.opacity(opacity))
+            .drawingGroup()
             .offset(x: drift ? amplitude : -amplitude)
-            .onAppear {
-                withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
-                    drift = true
-                }
-            }
+            .onAppear(perform: startIfNeeded)
+            .onChange(of: paused) { _, _ in startIfNeeded() }
+    }
+
+    private func startIfNeeded() {
+        guard !paused else { return }
+        withAnimation(.easeInOut(duration: duration).repeatForever(autoreverses: true)) {
+            drift = true
+        }
     }
 }
 
 /// A simple sailboat (hull + two sails + mast) that rocks and bobs.
 private struct SailboatView: View {
+    var paused: Bool = false
     @State private var bob = false
 
     var body: some View {
@@ -586,13 +602,18 @@ private struct SailboatView: View {
                 .fill(MapTheme.coral)
             }
         }
+        .drawingGroup()
         .rotationEffect(.degrees(bob ? 3.5 : -3.5))
         .offset(y: bob ? 5 : -3)
         .shadow(color: .black.opacity(0.12), radius: 3, y: 2)
-        .onAppear {
-            withAnimation(.easeInOut(duration: 3.4).repeatForever(autoreverses: true)) {
-                bob = true
-            }
+        .onAppear(perform: startIfNeeded)
+        .onChange(of: paused) { _, _ in startIfNeeded() }
+    }
+
+    private func startIfNeeded() {
+        guard !paused else { return }
+        withAnimation(.easeInOut(duration: 3.4).repeatForever(autoreverses: true)) {
+            bob = true
         }
     }
 }
@@ -606,11 +627,14 @@ private struct LeapingDolphin: View {
     let size: CGFloat
     let duration: Double
     let delay: Double
+    var paused: Bool = false
 
     private var leapHeight: CGFloat { size * 0.95 }
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        // Cap to ~30fps and stop entirely behind a presented sheet, so the per-frame
+        // recompute doesn't fight the presentation transition.
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
             let elapsed = timeline.date.timeIntervalSinceReferenceDate - delay
             let cycles = elapsed / duration
             let phase = cycles - floor(cycles)        // 0..1 within each leap
