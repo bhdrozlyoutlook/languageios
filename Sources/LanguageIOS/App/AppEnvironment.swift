@@ -106,13 +106,13 @@ public extension AppEnvironment {
             // Gemini first: it identifies the actual object (not a generic on-device guess
             // like "table" for a cup) and honours the regional variant (American vs British
             // English). On-device is only the offline fallback when the network call fails.
-            return GeminiObjectRecognizer(apiKey: key, fallback: OnDeviceObjectRecognizer())
+            return GeminiObjectRecognizer(apiKey: key, model: Secrets.geminiModel, fallback: OnDeviceObjectRecognizer())
         }
     }
 
     private static func makeSentenceAnalyzer() -> SentenceAnalyzing {
         let key = Secrets.geminiAPIKey
-        return key.isEmpty ? HeuristicSentenceAnalyzer() : GeminiSentenceAnalyzer(apiKey: key)
+        return key.isEmpty ? HeuristicSentenceAnalyzer() : GeminiSentenceAnalyzer(apiKey: key, model: Secrets.geminiModel)
     }
 
     /// All no-op / in-memory — for `#Preview` and tests that don't assert side effects.

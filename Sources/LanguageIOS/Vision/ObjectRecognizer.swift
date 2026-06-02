@@ -94,8 +94,8 @@ public final class GeminiObjectRecognizer: ObjectRecognizing {
         self.fallback = fallback
     }
 
-    public convenience init(apiKey: String, fallback: ObjectRecognizing? = OnDeviceObjectRecognizer()) {
-        self.init(client: GeminiClient(apiKey: apiKey), fallback: fallback)
+    public convenience init(apiKey: String, model: String = "gemini-2.5-flash", fallback: ObjectRecognizing? = OnDeviceObjectRecognizer()) {
+        self.init(client: GeminiClient(apiKey: apiKey, model: model), fallback: fallback)
     }
 
     public func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition? {

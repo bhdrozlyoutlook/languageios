@@ -9,6 +9,14 @@ public enum Secrets {
     public static var geminiAPIKey: String { value(for: "GEMINI_API_KEY") }
     public static var elevenLabsAPIKey: String { value(for: "ELEVENLABS_API_KEY") }
 
+    /// Override the Gemini model from Secrets.plist (`GEMINI_MODEL`) without a code change —
+    /// model availability/quota shifts (e.g. gemini-1.5-flash was retired, 2.0-flash has no
+    /// free-tier quota). Defaults to gemini-2.5-flash.
+    public static var geminiModel: String {
+        let model = value(for: "GEMINI_MODEL")
+        return model.isEmpty ? "gemini-2.5-flash" : model
+    }
+
     public static func value(for key: String) -> String {
         if let env = ProcessInfo.processInfo.environment[key], !env.isEmpty {
             return env

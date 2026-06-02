@@ -12,8 +12,8 @@ public final class GeminiSentenceAnalyzer: SentenceAnalyzing {
         self.fallback = fallback
     }
 
-    public convenience init(apiKey: String, fallback: SentenceAnalyzing = HeuristicSentenceAnalyzer()) {
-        self.init(client: GeminiClient(apiKey: apiKey), fallback: fallback)
+    public convenience init(apiKey: String, model: String = "gemini-2.5-flash", fallback: SentenceAnalyzing = HeuristicSentenceAnalyzer()) {
+        self.init(client: GeminiClient(apiKey: apiKey, model: model), fallback: fallback)
     }
 
     public func analyze(_ sentence: String, language: TargetLanguage) async -> SentenceAnalysis {
