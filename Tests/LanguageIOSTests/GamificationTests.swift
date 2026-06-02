@@ -137,6 +137,25 @@ final class GamificationTests: XCTestCase {
         XCTAssertTrue(spy.names.contains("streak_extended"))
     }
 
+    func testActivitiesTodayCountsAndResetsByDay() {
+        var state = GamificationState()
+        state.recordPass(stopId: "a", stars: 1, now: day0, calendar: utc)
+        XCTAssertEqual(state.activitiesToday, 1)
+
+        state.recordPractice(xpGain: 5, now: day0.addingTimeInterval(3600), calendar: utc)
+        XCTAssertEqual(state.activitiesToday, 2, "same day accumulates")
+
+        state.recordPass(stopId: "b", stars: 1, now: day0.addingTimeInterval(86400), calendar: utc)
+        XCTAssertEqual(state.activitiesToday, 1, "new day resets")
+    }
+
+    func testDailyGoalTargetMapping() {
+        XCTAssertEqual(DailyGoal.fiveMinutes.targetActivities, 1)
+        XCTAssertEqual(DailyGoal.tenMinutes.targetActivities, 2)
+        XCTAssertEqual(DailyGoal.fifteenMinutes.targetActivities, 3)
+        XCTAssertEqual(DailyGoal.thirtyMinutes.targetActivities, 4)
+    }
+
     func testResetAllClearsGamification() {
         let store = InMemoryKeyValueStore()
         let app = AppStore(environment: makeTestEnvironment(store: store))

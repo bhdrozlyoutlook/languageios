@@ -194,6 +194,11 @@ public struct ProfileView: View {
 
     private var statsSection: some View {
         section(title: "İstatistikler") {
+            infoRow(
+                icon: "target",
+                label: "Bugünkü hedef",
+                value: "\(store.activitiesToday)/\(store.dailyGoalTarget)" + (store.dailyGoalReached ? "  ✓" : "")
+            )
             infoRow(icon: "checkmark.seal.fill", label: "Tamamlanan durak", value: "\(store.completedStopCount)")
             infoRow(icon: "star.fill", label: "Toplam yıldız", value: "\(store.totalStars)")
         }

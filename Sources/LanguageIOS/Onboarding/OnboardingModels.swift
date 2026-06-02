@@ -284,6 +284,16 @@ public enum DailyGoal: Int, CaseIterable, Identifiable, Codable {
     public var id: Int { rawValue }
     public var title: String { "\(rawValue) dakika" }
 
+    /// Target number of completed lessons/practices per day for this goal.
+    public var targetActivities: Int {
+        switch self {
+        case .fiveMinutes: 1
+        case .tenMinutes: 2
+        case .fifteenMinutes: 3
+        case .thirtyMinutes: 4
+        }
+    }
+
     public var subtitle: String {
         switch self {
         case .fiveMinutes:

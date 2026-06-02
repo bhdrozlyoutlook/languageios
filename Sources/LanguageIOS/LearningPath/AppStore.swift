@@ -136,6 +136,11 @@ public final class AppStore {
     public var completedStopCount: Int { progressByLanguage.values.reduce(0) { $0 + $1.completedCount } }
     public func userProfile() -> UserProfile? { profiles.loadProfile() }
 
+    /// Daily goal progress: lessons/practices done today vs the onboarding target.
+    public var activitiesToday: Int { gamification.activitiesToday }
+    public var dailyGoalTarget: Int { profiles.loadProfile()?.dailyGoal?.targetActivities ?? 2 }
+    public var dailyGoalReached: Bool { activitiesToday >= dailyGoalTarget }
+
     public func completedStopCount(for language: TargetLanguage) -> Int {
         progress(for: language).completedCount
     }

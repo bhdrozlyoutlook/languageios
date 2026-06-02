@@ -13,6 +13,8 @@ public struct GamificationState: Codable, Equatable {
     public var heartsUpdatedAt: Date?
     /// Word ids the user got wrong; review prioritizes these (spaced repetition).
     public var missedWordIds: Set<String>
+    /// Lessons/practices completed today, toward the daily goal. Resets each new day.
+    public var activitiesToday: Int
 
     public static let maxHearts = 5
     public static let heartRefillInterval: TimeInterval = 20 * 60 // 20 minutes
@@ -24,7 +26,8 @@ public struct GamificationState: Codable, Equatable {
         starsByStop: [String: Int] = [:],
         hearts: Int = GamificationState.maxHearts,
         heartsUpdatedAt: Date? = nil,
-        missedWordIds: Set<String> = []
+        missedWordIds: Set<String> = [],
+        activitiesToday: Int = 0
     ) {
         self.xp = xp
         self.streak = streak
@@ -33,6 +36,7 @@ public struct GamificationState: Codable, Equatable {
         self.hearts = hearts
         self.heartsUpdatedAt = heartsUpdatedAt
         self.missedWordIds = missedWordIds
+        self.activitiesToday = activitiesToday
     }
 
     // Backward-compatible decoding: `missedWordIds` is optional in stored data so older
@@ -46,6 +50,7 @@ public struct GamificationState: Codable, Equatable {
         hearts = try container.decode(Int.self, forKey: .hearts)
         heartsUpdatedAt = try container.decodeIfPresent(Date.self, forKey: .heartsUpdatedAt)
         missedWordIds = try container.decodeIfPresent(Set<String>.self, forKey: .missedWordIds) ?? []
+        activitiesToday = try container.decodeIfPresent(Int.self, forKey: .activitiesToday) ?? 0
     }
 
     /// XP awarded for passing a lesson with the given stars.
@@ -87,14 +92,14 @@ public struct GamificationState: Codable, Equatable {
     public mutating func recordPass(stopId: String, stars: Int, now: Date, calendar: Calendar = .current) {
         starsByStop[stopId] = max(starsByStop[stopId] ?? 0, stars)
         xp += Self.xpForPass(stars: stars)
-        updateStreak(now: now, calendar: calendar)
+        registerDailyActivity(now: now, calendar: calendar)
     }
 
     /// A practice/review session: awards XP and keeps the streak alive, but does not
     /// touch per-stop stars.
     public mutating func recordPractice(xpGain: Int, now: Date, calendar: Calendar = .current) {
         xp += max(0, xpGain)
-        updateStreak(now: now, calendar: calendar)
+        registerDailyActivity(now: now, calendar: calendar)
     }
 
     // MARK: Spaced repetition
@@ -111,23 +116,22 @@ public struct GamificationState: Codable, Equatable {
         missedWordIds.contains(wordId)
     }
 
-    private mutating func updateStreak(now: Date, calendar: Calendar) {
+    /// Updates streak and the daily activity counter for one completed lesson/practice.
+    private mutating func registerDailyActivity(now: Date, calendar: Calendar) {
         let today = calendar.startOfDay(for: now)
-        guard let previous = lastActiveDate.map({ calendar.startOfDay(for: $0) }) else {
-            streak = 1
-            lastActiveDate = today
-            return
-        }
-        let dayDelta = calendar.dateComponents([.day], from: previous, to: today).day ?? 0
-        switch dayDelta {
-        case 0:
-            break // already counted today
-        case 1:
-            streak += 1
-            lastActiveDate = today
-        default:
-            streak = 1
+        let previous = lastActiveDate.map { calendar.startOfDay(for: $0) }
+
+        if previous != today {
+            // First activity of a new day: roll the streak and reset today's counter.
+            if let previous {
+                let dayDelta = calendar.dateComponents([.day], from: previous, to: today).day ?? 0
+                streak = (dayDelta == 1) ? streak + 1 : 1
+            } else {
+                streak = 1
+            }
+            activitiesToday = 0
             lastActiveDate = today
         }
+        activitiesToday += 1
     }
 }
