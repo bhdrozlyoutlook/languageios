@@ -219,3 +219,15 @@
 "%lld dakikalık konsantre seanslarla 3 ay sonra temel sohbet, 6 ay sonra rahat ifade seviyesine ulaşırsın." = "With %lld-minute focused sessions, you reach basic conversation in 3 months and comfortable expression in 6.";
 "Tutarlı %lld dakika = haftada ~%lld dk = ay sonu ciddi mesafe. Küçük adımlar büyük fark yaratır." = "A steady %lld min = ~%lld min/week = serious distance by month's end. Small steps make a big difference.";
 "Bu seçim, planının önemli bir parçası." = "This choice is an important part of your plan.";
+
+/* ===== Accessibility ===== */
+"Kilitli" = "Locked";
+"Aktif, başlamak için dokun" = "Active, tap to start";
+"Tamamlandı" = "Completed";
+"Yolculuk seçenekleri" = "Journey options";
+"Dersi kapat" = "Close lesson";
+"Seslendir" = "Speak";
+"Tekrar dinle" = "Listen again";
+"Önceki adıma dön" = "Go to previous step";
+"Onboarding'i başa al" = "Restart onboarding";
+"Kapat" = "Close";

@@ -129,11 +129,12 @@ struct StopNodeView: View {
     }
 
     private var accessibilityStatus: String {
-        switch status {
+        let value: String.LocalizationValue = switch status {
         case .locked: "Kilitli"
         case .active: "Aktif, başlamak için dokun"
         case .completed: "Tamamlandı"
         }
+        return String(localized: value)
     }
 
     private func animateReveal() {
