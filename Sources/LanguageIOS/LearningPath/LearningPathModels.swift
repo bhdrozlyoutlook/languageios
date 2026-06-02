@@ -199,15 +199,17 @@ public extension LearningJourney {
     }
 
     /// Shared unit themes layered on top of each destination, in order.
-    static let unitThemes: [String] = [
-        "İlk kelimeler",
-        "Selamlaşma",
-        "Günlük diyaloglar",
-        "Alışveriş ve sayılar",
-        "Seyahat ve yön sorma",
-        "İş ve kariyer",
-        "Akıcı konuşma"
-    ]
+    static var unitThemes: [String] {
+        [
+            String(localized: "İlk kelimeler"),
+            String(localized: "Selamlaşma"),
+            String(localized: "Günlük diyaloglar"),
+            String(localized: "Alışveriş ve sayılar"),
+            String(localized: "Seyahat ve yön sorma"),
+            String(localized: "İş ve kariyer"),
+            String(localized: "Akıcı konuşma")
+        ]
+    }
 
     private static func make(
         _ language: TargetLanguage,

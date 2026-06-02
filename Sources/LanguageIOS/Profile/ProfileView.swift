@@ -179,7 +179,7 @@ public struct ProfileView: View {
         }
     }
 
-    private func heroPill(icon: String, value: String, label: String, tint: Color) -> some View {
+    private func heroPill(icon: String, value: String, label: LocalizedStringKey, tint: Color) -> some View {
         VStack(spacing: 4) {
             Image(systemName: icon).font(.title2).foregroundStyle(tint)
             Text(value).font(.title3.bold().monospacedDigit()).foregroundStyle(OnboardingTheme.ink)
@@ -227,10 +227,10 @@ public struct ProfileView: View {
                 infoRow(icon: "clock.fill", label: "Günlük hedef", value: goal.title)
             }
             if !profile.learningPurposes.isEmpty {
-                infoRow(icon: "target", label: "Amaç", value: "\(profile.learningPurposes.count) sebep")
+                infoRow(icon: "target", label: "Amaç", value: String(localized: "\(profile.learningPurposes.count) sebep"))
             }
             if !profile.learningStyles.isEmpty {
-                infoRow(icon: "sparkles", label: "Öğrenme stili", value: "\(profile.learningStyles.count) seçim")
+                infoRow(icon: "sparkles", label: "Öğrenme stili", value: String(localized: "\(profile.learningStyles.count) seçim"))
             }
         }
     }
@@ -310,7 +310,7 @@ public struct ProfileView: View {
 
     // MARK: Building blocks
 
-    private func section<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func section<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.system(size: 18, weight: .bold, design: .serif))
@@ -319,7 +319,7 @@ public struct ProfileView: View {
         }
     }
 
-    private func infoRow(icon: String, label: String, value: String) -> some View {
+    private func infoRow(icon: String, label: LocalizedStringKey, value: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.subheadline)

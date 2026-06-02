@@ -93,9 +93,9 @@ public struct LearningPathView: View {
     private var noHeartsMessage: String {
         if let seconds = store.secondsUntilNextHeart() {
             let minutes = max(1, Int(seconds / 60))
-            return "Yeni can için ~\(minutes) dk bekle."
+            return String(localized: "Yeni can için ~\(minutes) dk bekle.")
         }
-        return "Birazdan canların yenilenecek."
+        return String(localized: "Birazdan canların yenilenecek.")
     }
 
     @ViewBuilder

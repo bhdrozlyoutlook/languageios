@@ -106,11 +106,67 @@
 "Kontrol Et" = "Check";
 "Tekrar dene" = "Try again";
 "Kaydet" = "Save";
+"Tebrikler! 🎉" = "Congratulations! 🎉";
+"Canların bitti 💔" = "You're out of lives 💔";
+"Bu durağı tamamladın." = "You completed this stop.";
+"Bir nefes al ve tekrar dene." = "Take a breath and try again.";
+"Haritaya dön" = "Back to map";
+"Doğru!" = "Correct!";
+"Yanlış" = "Wrong";
+"Dinle ve seç" = "Listen and choose";
+"Bu kelimenin çevirisi?" = "What's the translation?";
+"Bunu hedef dilde yaz" = "Write this in the target language";
+"Cevabını yaz" = "Type your answer";
+"Doğru cevap: %@" = "Correct answer: %@";
+"Kelimeleri eşleştir" = "Match the words";
 
 /* ===== Object labeling ===== */
 "Objeleri öğren" = "Learn objects";
 "Fotoğraf seç" = "Choose a photo";
+"Bir fotoğraf seç; içindeki objeyi tanıyıp kelimesini öğretelim." = "Pick a photo; we'll recognize the object inside and teach you its word.";
+"Bu fotoğrafta tanıdık bir obje bulamadım — başka bir tane dene." = "I couldn't find a familiar object in this photo — try another one.";
+"Kelimelerime ekle" = "Add to my words";
+"Eklendi ✓" = "Added ✓";
 
-/* ===== Map / profile ===== */
-"Profil" = "Profile";
+/* ===== Map ===== */
 "Pratik yap" = "Practice";
+"İlerlemeyi sıfırla" = "Reset progress";
+"Onboarding'i tekrar gör" = "Restart onboarding";
+"Canların bitti" = "Out of lives";
+"Yeni can için ~%lld dk bekle." = "~%lld min until your next life.";
+"Birazdan canların yenilenecek." = "Your lives will refill soon.";
+"İlk kelimeler" = "First words";
+"Selamlaşma" = "Greetings";
+"Günlük diyaloglar" = "Everyday dialogue";
+"Alışveriş ve sayılar" = "Shopping & numbers";
+"Seyahat ve yön sorma" = "Travel & directions";
+"İş ve kariyer" = "Work & career";
+"Akıcı konuşma" = "Fluent speaking";
+
+/* ===== Profile ===== */
+"Profil" = "Profile";
+"İstatistikler" = "Statistics";
+"Profilin" = "Your profile";
+"Hatırlatma" = "Reminders";
+"Hesap" = "Account";
+"Dil değiştir" = "Switch language";
+"Seri" = "Streak";
+"Can" = "Lives";
+"Bugünkü hedef" = "Today's goal";
+"Tamamlanan durak" = "Stops completed";
+"Toplam yıldız" = "Total stars";
+"Yakalanan kelime" = "Captured words";
+"Öğrenilen dil" = "Learning";
+"Ana dil" = "Native language";
+"Yaş" = "Age";
+"Günlük hedef" = "Daily goal";
+"Amaç" = "Purpose";
+"Öğrenme stili" = "Learning style";
+"%lld sebep" = "%lld reasons";
+"%lld seçim" = "%lld choices";
+"Günlük hatırlatma" = "Daily reminder";
+"Hatırlatma saati" = "Reminder time";
+"Çıkış yap" = "Sign out";
+"Giriş" = "Signed in";
+"Apple ile giriş yapıldı" = "Signed in with Apple";
+"Vazgeç" = "Cancel";

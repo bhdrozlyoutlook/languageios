@@ -143,7 +143,7 @@ struct LessonResultView: View {
         VStack(spacing: 20) {
             Spacer()
 
-            Text(passed ? "Tebrikler! 🎉" : "Canların bitti 💔")
+            Text(passed ? LocalizedStringKey("Tebrikler! 🎉") : LocalizedStringKey("Canların bitti 💔"))
                 .font(.system(size: 32, weight: .black, design: .serif))
                 .foregroundStyle(OnboardingTheme.ink)
                 .multilineTextAlignment(.center)
@@ -162,7 +162,7 @@ struct LessonResultView: View {
                     .foregroundStyle(OnboardingTheme.teal)
             }
 
-            Text(passed ? "Bu durağı tamamladın." : "Bir nefes al ve tekrar dene.")
+            Text(passed ? LocalizedStringKey("Bu durağı tamamladın.") : LocalizedStringKey("Bir nefes al ve tekrar dene."))
                 .font(.title3)
                 .foregroundStyle(OnboardingTheme.ink.opacity(0.7))
                 .multilineTextAlignment(.center)
@@ -201,7 +201,7 @@ struct CheckFooter: View {
             if checked {
                 HStack(spacing: 8) {
                     Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    Text(isCorrect ? "Doğru!" : "Yanlış")
+                    Text(isCorrect ? LocalizedStringKey("Doğru!") : LocalizedStringKey("Yanlış"))
                 }
                 .font(.headline.bold())
                 .foregroundStyle(isCorrect ? Color.green : OnboardingTheme.coral)
