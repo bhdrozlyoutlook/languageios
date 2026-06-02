@@ -9,6 +9,8 @@ public enum PersistenceSchema {
     public static let gamificationKey = "language-ios.gamification.v2"
     public static let crashBreadcrumbsKey = "language-ios.crash-breadcrumbs.v1"
     public static let capturedObjectsKey = "language-ios.captured-objects.v1"
+    public static let entitlementKey = "language-ios.entitlement.v1"
+    public static let purchaseLedgerKey = "language-ios.purchase-ledger.v1"
 
     /// The single JSON blob written by the pre-repository `AppStore`. Source for migration.
     public static let legacyAppStateKey = "language-ios.app-state.v1"
