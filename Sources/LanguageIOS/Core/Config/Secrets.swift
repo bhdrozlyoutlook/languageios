@@ -4,7 +4,7 @@ import Foundation
 ///   1. Process environment (handy for local dev / CI: `GEMINI_API_KEY=...`)
 ///   2. `Secrets.plist` bundled in the app (gitignored; the real keys live only here)
 /// In SwiftPM tests there is no app bundle and usually no env var, so every key reads as
-/// empty — adapters then fall back to their on-device/stub implementation.
+/// empty. Object recognition then returns no match instead of using a Vision fallback.
 public enum Secrets {
     public static var geminiAPIKey: String { value(for: "GEMINI_API_KEY") }
     public static var elevenLabsAPIKey: String { value(for: "ELEVENLABS_API_KEY") }

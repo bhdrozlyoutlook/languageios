@@ -30,7 +30,7 @@ public struct AppEnvironment {
         notifications: NotificationScheduling,
         speech: SpeechService,
         captureRepository: CaptureRepository,
-        objectRecognizer: ObjectRecognizing = LazyObjectRecognizer { OnDeviceObjectRecognizer() },
+        objectRecognizer: ObjectRecognizing = LazyObjectRecognizer { GeminiObjectRecognizer(apiKey: "") },
         sentenceAnalyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer()
     ) {
         self.analytics = analytics
@@ -97,16 +97,11 @@ public extension AppEnvironment {
         )
     }
 
-    /// Uses Gemini when an API key is configured (Secrets.plist / env), otherwise the
-    /// on-device recognizer. Gemini itself falls back to on-device on network errors.
+    /// Uses Gemini for object identification. Missing keys or network failures return no
+    /// match; object names never fall back to Apple's on-device Vision classifier.
     private static func makeObjectRecognizer() -> ObjectRecognizing {
         LazyObjectRecognizer {
-            let key = Secrets.geminiAPIKey
-            guard !key.isEmpty else { return OnDeviceObjectRecognizer() }
-            // Gemini first: it identifies the actual object (not a generic on-device guess
-            // like "table" for a cup) and honours the regional variant (American vs British
-            // English). On-device is only the offline fallback when the network call fails.
-            return GeminiObjectRecognizer(apiKey: key, model: Secrets.geminiModel, fallback: OnDeviceObjectRecognizer())
+            GeminiObjectRecognizer(apiKey: Secrets.geminiAPIKey, model: Secrets.geminiModel)
         }
     }
 

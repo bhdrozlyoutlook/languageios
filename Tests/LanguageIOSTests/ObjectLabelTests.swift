@@ -7,6 +7,9 @@ final class ObjectLabelTests: XCTestCase {
         XCTAssertEqual(ObjectVocabulary.translation(for: "cup"), "fincan")
         XCTAssertEqual(ObjectVocabulary.translation(for: "coffee_mug"), "kahve kupası")
         XCTAssertEqual(ObjectVocabulary.translation(for: "wooden table"), "masa") // last-word fallback
+        XCTAssertEqual(ObjectVocabulary.translation(for: "sunglasses"), "güneş gözlüğü")
+        XCTAssertEqual(ObjectVocabulary.translation(for: "dark_glasses"), "güneş gözlüğü")
+        XCTAssertEqual(ObjectVocabulary.translation(for: "eyeglasses"), "gözlük")
         XCTAssertNil(ObjectVocabulary.translation(for: "xyzzy"))
     }
 
@@ -22,6 +25,21 @@ final class ObjectLabelTests: XCTestCase {
 
     func testBestMatchIsNilWhenNoneTranslatable() {
         XCTAssertNil(ObjectVocabulary.bestMatch(in: [ObjectLabel(identifier: "qwerty", confidence: 0.9)]))
+    }
+
+    func testBestMatchFindsSunglassesBeforeGenericFallbacks() {
+        let labels = [
+            ObjectLabel(identifier: "document", confidence: 0.76),
+            ObjectLabel(identifier: "screenshot", confidence: 0.76),
+            ObjectLabel(identifier: "optical_equipment", confidence: 0.22),
+            ObjectLabel(identifier: "sunglasses", confidence: 0.22),
+            ObjectLabel(identifier: "clothing", confidence: 0.07)
+        ]
+
+        let match = ObjectVocabulary.bestMatch(in: labels)
+
+        XCTAssertEqual(match?.english, "sunglasses")
+        XCTAssertEqual(match?.turkish, "güneş gözlüğü")
     }
 
     func testStubClassifierReturnsConfiguredResult() async {
@@ -52,24 +70,22 @@ final class ObjectLabelTests: XCTestCase {
         XCTAssertEqual(cutout, Data([0xC]))
     }
 
-    func testFastObjectRecognizerUsesLocalEnglishResultWithoutWaitingForRemote() async {
-        let local = DelayedObjectRecognizer(
-            result: ObjectRecognition(word: "cat", native: "kedi", english: "cat"),
-            delay: .milliseconds(20)
-        )
-        let remote = DelayedObjectRecognizer(
-            result: ObjectRecognition(word: "gato", native: "kedi", english: "cat"),
-            delay: .milliseconds(500)
-        )
-        let recognizer = FastObjectRecognizer(local: local, remote: remote)
+    func testCutoutRefinesWrongFullFrameRecognition() async {
+        let recognizer = DataDrivenObjectRecognizer(results: [
+            Data([0x1]): ObjectRecognition(word: "computer", native: "bilgisayar", english: "computer"),
+            Data([0xC]): ObjectRecognition(word: "sunglasses", native: "güneş gözlüğü", english: "sunglasses")
+        ])
 
-        let started = Date()
-        let result = await recognizer.recognize(Data([0x1]), target: .englishUS, native: .turkish)
+        let refined = await ObjectCaptureAnalyzer.refineRecognition(
+            cutout: Data([0xC]),
+            original: ObjectRecognition(word: "computer", native: "bilgisayar", english: "computer"),
+            recognizer: recognizer,
+            language: .englishUS,
+            native: .turkish
+        )
 
-        XCTAssertLessThan(Date().timeIntervalSince(started), 0.25)
-        XCTAssertEqual(result?.word, "cat")
-        XCTAssertEqual(local.callCount, 1)
-        XCTAssertEqual(remote.callCount, 0)
+        XCTAssertEqual(refined?.word, "sunglasses")
+        XCTAssertEqual(refined?.native, "güneş gözlüğü")
     }
 
     func testCaptureWordDeduplicatesAndPersists() {
@@ -129,5 +145,17 @@ private final class DelayedSubjectExtractor: SubjectExtracting {
     func extractSubject(from imageData: Data) async -> Data? {
         try? await Task.sleep(for: delay)
         return result
+    }
+}
+
+private final class DataDrivenObjectRecognizer: ObjectRecognizing {
+    private let results: [Data: ObjectRecognition]
+
+    init(results: [Data: ObjectRecognition]) {
+        self.results = results
+    }
+
+    func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition? {
+        results[imageData]
     }
 }

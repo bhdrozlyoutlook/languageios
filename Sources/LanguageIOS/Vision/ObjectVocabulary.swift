@@ -18,7 +18,10 @@ enum ObjectVocabulary {
         "sky": "gökyüzü", "cloud": "bulut", "building": "bina", "house": "ev",
         "door": "kapı", "window": "pencere", "wall": "duvar", "floor": "zemin",
         "shoe": "ayakkabı", "clothing": "giysi", "hat": "şapka", "bag": "çanta",
-        "clock": "saat", "glasses": "gözlük", "pen": "kalem", "pencil": "kurşun kalem",
+        "clock": "saat", "glasses": "gözlük", "eyeglasses": "gözlük",
+        "spectacles": "gözlük", "sunglasses": "güneş gözlüğü",
+        "sun glasses": "güneş gözlüğü", "dark glasses": "güneş gözlüğü",
+        "shades": "güneş gözlüğü", "pen": "kalem", "pencil": "kurşun kalem",
         "paper": "kağıt", "money": "para", "key": "anahtar", "lamp": "lamba",
         "television": "televizyon", "guitar": "gitar", "ball": "top", "toy": "oyuncak"
     ]

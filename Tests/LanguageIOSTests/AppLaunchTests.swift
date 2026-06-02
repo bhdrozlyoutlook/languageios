@@ -26,6 +26,14 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertTrue(environmentSource.contains("private static func makeObjectRecognizer() -> ObjectRecognizing {\n        LazyObjectRecognizer"))
     }
 
+    func testLiveObjectRecognizerIsGeminiOnly() throws {
+        let environmentSource = try sourceText(at: "Sources/LanguageIOS/App/AppEnvironment.swift")
+
+        XCTAssertFalse(environmentSource.contains("return OnDeviceObjectRecognizer()"))
+        XCTAssertFalse(environmentSource.contains("fallback: OnDeviceObjectRecognizer"))
+        XCTAssertTrue(environmentSource.contains("GeminiObjectRecognizer(apiKey: Secrets.geminiAPIKey"))
+    }
+
     func testPlanSummaryAnimationDoesNotActLikeAStartupLoadingScreen() throws {
         let onboardingSource = try sourceText(at: "Sources/LanguageIOS/Onboarding/OnboardingView.swift")
 

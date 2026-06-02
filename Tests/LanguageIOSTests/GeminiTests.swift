@@ -51,7 +51,7 @@ final class GeminiTests: XCTestCase {
         XCTAssertEqual(result?.english, "chien")
     }
 
-    // MARK: On-device recognizer + Gemini fallback path
+    // MARK: On-device recognizer + Gemini-only object path
 
     func testOnDeviceRecognizerUsesVocabulary() async {
         let stub = StubImageClassifier(result: [ObjectLabel(identifier: "dog", confidence: 0.9)])
@@ -61,11 +61,11 @@ final class GeminiTests: XCTestCase {
         XCTAssertEqual(result?.native, "köpek")
     }
 
-    func testGeminiRecognizerFallsBackWhenKeyMissing() async {
-        let stub = StubImageClassifier(result: [ObjectLabel(identifier: "cat", confidence: 0.9)])
-        let recognizer = GeminiObjectRecognizer(apiKey: "", fallback: OnDeviceObjectRecognizer(classifier: stub))
-        let result = await recognizer.recognize(Data(), target: .englishUS, native: .turkish)
-        XCTAssertEqual(result?.word, "cat") // Gemini threw missingKey -> on-device fallback
+    func testGeminiRecognizerDoesNotUseOnDeviceFallback() throws {
+        let recognizerSource = try sourceText(at: "Sources/LanguageIOS/Vision/ObjectRecognizer.swift")
+
+        XCTAssertFalse(recognizerSource.contains("fallback: ObjectRecognizing?"))
+        XCTAssertFalse(recognizerSource.contains("return await fallback"))
     }
 
     // MARK: Sentence analyzer parsing + fallback
@@ -99,4 +99,12 @@ final class GeminiTests: XCTestCase {
         XCTAssertEqual(TargetLanguage.englishUK.englishName, "British English")
         XCTAssertEqual(TargetLanguage.french.englishName, "French")
     }
+}
+
+private func sourceText(at relativePath: String) throws -> String {
+    let root = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+    return try String(contentsOf: root.appendingPathComponent(relativePath), encoding: .utf8)
 }

@@ -14,8 +14,7 @@ public struct ObjectRecognition: Equatable {
 }
 
 /// Recognizes the main object in a captured image and returns its word in the target
-/// language + Turkish translation. The default is on-device (Apple Vision + a small
-/// dictionary); `GeminiObjectRecognizer` swaps in once a key is configured.
+/// language + Turkish translation. Production object naming is Gemini-only.
 public protocol ObjectRecognizing: AnyObject {
     func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition?
 }
@@ -43,8 +42,8 @@ public actor LazyObjectRecognizer: ObjectRecognizing {
 }
 
 /// On-device recognizer: Apple's Vision classifier + the built-in English→Turkish
-/// vocabulary. Target-language words are limited to English (the dictionary's language),
-/// so it doubles as the offline fallback for `GeminiObjectRecognizer`.
+/// vocabulary. Kept for isolated tests and experimentation; production object naming
+/// goes through `GeminiObjectRecognizer`.
 public final class OnDeviceObjectRecognizer: ObjectRecognizing {
     private let classifier: ImageClassifying
 
@@ -59,53 +58,27 @@ public final class OnDeviceObjectRecognizer: ObjectRecognizing {
     }
 }
 
-/// Keeps common English object capture instant by trying the on-device classifier before
-/// the network recognizer. Non-English targets still prefer the remote recognizer so the
-/// displayed word can be in the selected learning language.
-public final class FastObjectRecognizer: ObjectRecognizing {
-    private let local: ObjectRecognizing
-    private let remote: ObjectRecognizing?
-
-    public init(local: ObjectRecognizing = OnDeviceObjectRecognizer(), remote: ObjectRecognizing?) {
-        self.local = local
-        self.remote = remote
-    }
-
-    public func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition? {
-        if target.usesEnglishObjectVocabulary, let localResult = await local.recognize(imageData, target: target, native: native) {
-            return localResult
-        }
-        if let remoteResult = await remote?.recognize(imageData, target: target, native: native) {
-            return remoteResult
-        }
-        return await local.recognize(imageData, target: target, native: native)
-    }
-}
-
 /// Gemini-backed recognizer: sends the image to a multimodal model and asks for the object
-/// in the target language + Turkish gloss. Falls back to `fallback` (on-device) on any
-/// network/parse error so capture keeps working offline.
+/// in the target language + Turkish gloss. Missing keys, network errors, or parse failures
+/// return `nil`; object naming deliberately does not use Apple's Vision classifier.
 public final class GeminiObjectRecognizer: ObjectRecognizing {
     private let client: GeminiClient
-    private let fallback: ObjectRecognizing?
 
-    public init(client: GeminiClient, fallback: ObjectRecognizing? = OnDeviceObjectRecognizer()) {
+    public init(client: GeminiClient) {
         self.client = client
-        self.fallback = fallback
     }
 
-    public convenience init(apiKey: String, model: String = "gemini-2.5-flash", fallback: ObjectRecognizing? = OnDeviceObjectRecognizer()) {
-        self.init(client: GeminiClient(apiKey: apiKey, model: model), fallback: fallback)
+    public convenience init(apiKey: String, model: String = "gemini-2.5-flash") {
+        self.init(client: GeminiClient(apiKey: apiKey, model: model))
     }
 
     public func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition? {
         let prompt = Self.prompt(target: target, native: native)
         do {
             let text = try await client.generate(prompt: prompt, imageData: imageData)
-            if let recognition = Self.parse(text) { return recognition }
-            return await fallback?.recognize(imageData, target: target, native: native)
+            return Self.parse(text)
         } catch {
-            return await fallback?.recognize(imageData, target: target, native: native)
+            return nil
         }
     }
 
@@ -158,9 +131,5 @@ extension TargetLanguage {
         case .spanish: "Spanish"
         case .french: "French"
         }
-    }
-
-    fileprivate var usesEnglishObjectVocabulary: Bool {
-        self == .englishUS || self == .englishUK
     }
 }

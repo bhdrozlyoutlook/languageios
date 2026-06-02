@@ -43,7 +43,7 @@ public struct ObjectCaptureView: View {
 
     public init(
         store: AppStore,
-        recognizer: ObjectRecognizing = OnDeviceObjectRecognizer(),
+        recognizer: ObjectRecognizing = GeminiObjectRecognizer(apiKey: ""),
         extractor: SubjectExtracting = VisionSubjectExtractor(),
         speech: SpeechService,
         language: TargetLanguage,
@@ -463,13 +463,22 @@ public struct ObjectCaptureView: View {
             withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
                 phase = .result(initialResult)
             }
-            speech.speak(analysis.recognition.word, language: language)
 
-            guard let cutout = await analysis.cutout.value, !Task.isCancelled else { return }
+            guard let cutout = await analysis.cutout.value, !Task.isCancelled else {
+                speech.speak(analysis.recognition.word, language: language)
+                return
+            }
+            let finalRecognition = await ObjectCaptureAnalyzer.refineRecognition(
+                cutout: cutout,
+                original: analysis.recognition,
+                recognizer: recognizer,
+                language: language,
+                native: native
+            ) ?? analysis.recognition
             let stickerResult = CaptureResult(
                 display: cutout,
-                word: analysis.recognition.word,
-                native: analysis.recognition.native,
+                word: finalRecognition.word,
+                native: finalRecognition.native,
                 cutout: cutout
             )
             if case .result(let current) = phase,
@@ -480,6 +489,7 @@ public struct ObjectCaptureView: View {
                     phase = .result(stickerResult)
                 }
             }
+            speech.speak(finalRecognition.word, language: language)
         }
     }
 
@@ -533,6 +543,23 @@ enum ObjectCaptureAnalyzer {
             return ObjectCaptureAnalysis(preparedData: extracted, recognition: recognition, cutout: Task { extracted })
         }
         return nil
+    }
+
+    static func refineRecognition(
+        cutout: Data,
+        original: ObjectRecognition,
+        recognizer: ObjectRecognizing,
+        language: TargetLanguage,
+        native: TargetLanguage
+    ) async -> ObjectRecognition? {
+        let recognitionInput = await Task.detached(priority: .userInitiated) {
+            ImageNormalizer.onWhite(cutout)
+        }.value
+        guard let refined = await recognizer.recognize(recognitionInput, target: language, native: native),
+              refined != original else {
+            return nil
+        }
+        return refined
     }
 }
 
