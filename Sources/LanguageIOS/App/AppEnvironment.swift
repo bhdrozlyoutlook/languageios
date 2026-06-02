@@ -19,6 +19,7 @@ public struct AppEnvironment {
     public let purchaseService: PurchaseService
     public let objectRecognizer: ObjectRecognizing
     public let sentenceAnalyzer: SentenceAnalyzing
+    public let lyricsProvider: LyricsProviding
 
     public init(
         analytics: AnalyticsService,
@@ -35,7 +36,8 @@ public struct AppEnvironment {
         entitlementRepository: EntitlementRepository,
         purchaseService: PurchaseService = NoopPurchaseService(),
         objectRecognizer: ObjectRecognizing = LazyObjectRecognizer { GeminiObjectRecognizer(apiKey: "") },
-        sentenceAnalyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer()
+        sentenceAnalyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer(),
+        lyricsProvider: LyricsProviding = StubLyricsProvider()
     ) {
         self.analytics = analytics
         self.logger = logger
@@ -52,6 +54,7 @@ public struct AppEnvironment {
         self.purchaseService = purchaseService
         self.objectRecognizer = objectRecognizer
         self.sentenceAnalyzer = sentenceAnalyzer
+        self.lyricsProvider = lyricsProvider
     }
 }
 
@@ -102,7 +105,8 @@ public extension AppEnvironment {
             entitlementRepository: UserDefaultsEntitlementRepository(store: store, logger: logger),
             purchaseService: makePurchaseService(store: store, logger: logger),
             objectRecognizer: makeObjectRecognizer(),
-            sentenceAnalyzer: makeSentenceAnalyzer()
+            sentenceAnalyzer: makeSentenceAnalyzer(),
+            lyricsProvider: makeLyricsProvider()
         )
     }
 
@@ -138,6 +142,11 @@ public extension AppEnvironment {
     private static func makeSentenceAnalyzer() -> SentenceAnalyzing {
         let key = Secrets.geminiAPIKey
         return key.isEmpty ? HeuristicSentenceAnalyzer() : GeminiSentenceAnalyzer(apiKey: key, model: Secrets.geminiModel)
+    }
+
+    private static func makeLyricsProvider() -> LyricsProviding {
+        let key = Secrets.geminiAPIKey
+        return key.isEmpty ? StubLyricsProvider() : GeminiLyricsProvider(apiKey: key, model: Secrets.geminiModel)
     }
 
     /// All no-op / in-memory — for `#Preview` and tests that don't assert side effects.

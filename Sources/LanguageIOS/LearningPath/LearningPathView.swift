@@ -16,6 +16,7 @@ public struct LearningPathView: View {
     @State private var showCollection = false
     @State private var entitlementStart: EntitlementFlowView.Screen?
     @State private var showAI = false
+    @State private var showMusic = false
     @State private var showsAmbientDecorations = false
 
     private enum ActiveLesson: Identifiable {
@@ -37,7 +38,7 @@ public struct LearningPathView: View {
 
     /// True while any sheet / full-screen cover is presented over the map.
     private var isCovered: Bool {
-        activeLesson != nil || showProfile || showObjects || showCollection || showAI || showNoHearts || entitlementStart != nil
+        activeLesson != nil || showProfile || showObjects || showCollection || showAI || showMusic || showNoHearts || entitlementStart != nil
     }
 
     public var body: some View {
@@ -87,6 +88,9 @@ public struct LearningPathView: View {
         }
         .sheet(isPresented: $showAI) {
             SentenceAnalysisView(analyzer: env.sentenceAnalyzer, speech: env.speech, language: language, onClose: { showAI = false })
+        }
+        .sheet(isPresented: $showMusic) {
+            LyricsView(provider: env.lyricsProvider, speech: env.speech, language: language, onClose: { showMusic = false })
         }
     }
 
@@ -245,6 +249,15 @@ public struct LearningPathView: View {
                         .background(Circle().fill(MapTheme.paper.opacity(0.9)))
                 }
                 .accessibilityLabel("AI cümle analizi")
+
+                Button { showMusic = true } label: {
+                    Image(systemName: "music.note")
+                        .font(.title2)
+                        .foregroundStyle(MapTheme.ink)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(MapTheme.paper.opacity(0.9)))
+                }
+                .accessibilityLabel("Şarkıyla öğren")
 
                 Button { requestCamera() } label: {
                     Image(systemName: "camera.viewfinder")

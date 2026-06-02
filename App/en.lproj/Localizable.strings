@@ -289,3 +289,12 @@
 "Kullanım Şartları" = "Terms of Use";
 "Gizlilik Politikası" = "Privacy Policy";
 "Premium otomatik yenilenen bir aboneliktir. Ücret, satın alma onaylandığında Apple ID hesabından tahsil edilir; dönem bitiminden en az 24 saat önce iptal edilmezse otomatik yenilenir. Aboneliği iOS Ayarlar ▸ Apple Kimliği ▸ Abonelikler'den yönetebilir veya iptal edebilirsin." = "Premium is an auto-renewing subscription. Payment is charged to your Apple ID at confirmation of purchase and renews automatically unless cancelled at least 24 hours before the period ends. Manage or cancel it in iOS Settings ▸ Apple ID ▸ Subscriptions.";
+
+/* ===== Lyrics / learn with songs ===== */
+"Şarkıyla öğren" = "Learn with songs";
+"Bir şarkı + sanatçı yaz; sözlerinden sık geçen kalıpları Türkçesiyle öğren." = "Type a song + artist; learn common phrases from it with Turkish translations.";
+"Şarkı adı" = "Song title";
+"Sanatçı" = "Artist";
+"Şarkıdan öğren" = "Learn from song";
+"Telif sebebiyle şarkı sözleri değil, sık kullanılan kalıplar öğretilir." = "For copyright reasons, common phrases are taught rather than the lyrics themselves.";
+"Şarkı" = "Song";
