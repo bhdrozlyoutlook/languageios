@@ -177,7 +177,7 @@ final class EntitlementTests: XCTestCase {
         for product in PurchaseProduct.all {
             XCTAssertEqual(PurchaseProduct(productID: product.productID), product)
         }
-        XCTAssertEqual(PurchaseProduct.all.count, 7) // 2 premium + 5 token packs
+        XCTAssertEqual(PurchaseProduct.all.count, 43) // 2 premium + 41 token packs (10, 25..1000)
         XCTAssertEqual(PurchaseProduct.tokens(.fifty).productID, "com.bhdrozly.languageios.tokens.50")
         XCTAssertEqual(PurchaseProduct.premium(.weekly).productID, "com.bhdrozly.languageios.premium.weekly")
         XCTAssertNil(PurchaseProduct(productID: "com.other.app.premium.weekly"))

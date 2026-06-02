@@ -1,24 +1,22 @@
 import Foundation
 
-/// A purchasable token pack. 1 token = 1 extra Gemini object analysis.
-public enum TokenPack: String, CaseIterable, Sendable {
-    case ten
-    case fifty
-    case hundred
-    case twoFifty
-    case fiveHundred
+/// A purchasable token pack. 1 token = 1 extra Gemini object analysis. Data-driven so the
+/// ladder can be any list of counts without a wall of enum cases.
+public struct TokenPack: Equatable, Hashable, Sendable {
+    public let tokenCount: Int
 
-    public var tokenCount: Int {
-        switch self {
-        case .ten: 10
-        case .fifty: 50
-        case .hundred: 100
-        case .twoFifty: 250
-        case .fiveHundred: 500
-        }
+    public init(_ tokenCount: Int) {
+        self.tokenCount = tokenCount
     }
 
     public var idSuffix: String { String(tokenCount) }
+
+    /// The offered ladder: 10, then every 25 up to 1000.
+    public static let all: [TokenPack] = ([10] + Array(stride(from: 25, through: 1000, by: 25))).map(TokenPack.init)
+
+    // Convenience for tests.
+    public static let ten = TokenPack(10)
+    public static let fifty = TokenPack(50)
 }
 
 /// The in-app purchase catalog. Product IDs are the frozen contract App Store Connect must
@@ -43,7 +41,7 @@ public enum PurchaseProduct: Equatable, Sendable {
             self = .premium(period)
             return
         }
-        for pack in TokenPack.allCases where suffix == "tokens.\(pack.idSuffix)" {
+        for pack in TokenPack.all where suffix == "tokens.\(pack.idSuffix)" {
             self = .tokens(pack)
             return
         }
@@ -51,7 +49,7 @@ public enum PurchaseProduct: Equatable, Sendable {
     }
 
     public static var all: [PurchaseProduct] {
-        RenewalPeriod.allCases.map { .premium($0) } + TokenPack.allCases.map { .tokens($0) }
+        RenewalPeriod.allCases.map { .premium($0) } + TokenPack.all.map { .tokens($0) }
     }
 }
 
@@ -93,14 +91,8 @@ public struct PurchaseProductInfo: Identifiable, Equatable, Sendable {
         switch product {
         case .premium(.weekly): "₺49,99"
         case .premium(.monthly): "₺149,99"
-        case .tokens(let pack):
-            switch pack {
-            case .ten: "₺29,99"
-            case .fifty: "₺99,99"
-            case .hundred: "₺179,99"
-            case .twoFifty: "₺399,99"
-            case .fiveHundred: "₺699,99"
-            }
+        // Placeholder flat rate (~₺3/token) until real App Store prices are set.
+        case .tokens(let pack): "₺\(pack.tokenCount * 3 - 1),99"
         }
     }
 }
