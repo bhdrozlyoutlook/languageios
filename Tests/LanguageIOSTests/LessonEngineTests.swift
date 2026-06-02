@@ -81,6 +81,19 @@ final class LessonEngineTests: XCTestCase {
         XCTAssertTrue(lesson.items.contains { $0.id == "de_starter_0" })
     }
 
+    func testExpandedAuthoredStopsAreAvailable() {
+        XCTAssertEqual(
+            LessonContent.items(forStopId: "englishUS_arizona", language: .englishUS).first?.target,
+            "left"
+        )
+        XCTAssertTrue(
+            LessonContent.items(forStopId: "german_berlin", language: .german).contains { $0.target == "was" }
+        )
+        XCTAssertTrue(
+            LessonContent.items(forStopId: "french_marseille", language: .french).contains { $0.target == "quoi" }
+        )
+    }
+
     func testAuthoredContentCoversEveryLanguageFirstStop() {
         let firstWords: [TargetLanguage: String] = [
             .englishUS: "hello", .englishUK: "hello", .german: "hallo",

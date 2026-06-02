@@ -128,6 +128,58 @@ enum LessonContent {
             .init(id: "tr_an_4", target: "iyiyim", native: "I'm fine"),
             .init(id: "tr_an_5", target: "hoşça kal", native: "goodbye"),
             .init(id: "tr_an_6", target: "hoş geldin", native: "welcome")
+        ],
+
+        // English (US) — daha ileri duraklar
+        "englishUS_arizona": [   // Seyahat ve yön sorma
+            .init(id: "us_az_1", target: "left", native: "sol"),
+            .init(id: "us_az_2", target: "right", native: "sağ"),
+            .init(id: "us_az_3", target: "straight", native: "düz"),
+            .init(id: "us_az_4", target: "near", native: "yakın"),
+            .init(id: "us_az_5", target: "far", native: "uzak"),
+            .init(id: "us_az_6", target: "map", native: "harita")
+        ],
+        "englishUS_hawaii": [    // İş ve kariyer
+            .init(id: "us_hi_1", target: "work", native: "iş"),
+            .init(id: "us_hi_2", target: "job", native: "meslek"),
+            .init(id: "us_hi_3", target: "office", native: "ofis"),
+            .init(id: "us_hi_4", target: "meeting", native: "toplantı"),
+            .init(id: "us_hi_5", target: "email", native: "e-posta"),
+            .init(id: "us_hi_6", target: "boss", native: "patron")
+        ],
+        "englishUS_alaska": [    // Akıcı konuşma
+            .init(id: "us_ak_1", target: "maybe", native: "belki"),
+            .init(id: "us_ak_2", target: "because", native: "çünkü"),
+            .init(id: "us_ak_3", target: "however", native: "ama"),
+            .init(id: "us_ak_4", target: "I think", native: "bence"),
+            .init(id: "us_ak_5", target: "I agree", native: "katılıyorum"),
+            .init(id: "us_ak_6", target: "of course", native: "tabii ki")
+        ],
+
+        // Günlük diyaloglar (3. duraklar)
+        "german_berlin": [
+            .init(id: "de_be_1", target: "was", native: "ne"),
+            .init(id: "de_be_2", target: "wo", native: "nerede"),
+            .init(id: "de_be_3", target: "wer", native: "kim"),
+            .init(id: "de_be_4", target: "heute", native: "bugün"),
+            .init(id: "de_be_5", target: "jetzt", native: "şimdi"),
+            .init(id: "de_be_6", target: "hier", native: "burada")
+        ],
+        "spanish_sevilla": [
+            .init(id: "es_se_1", target: "qué", native: "ne"),
+            .init(id: "es_se_2", target: "dónde", native: "nerede"),
+            .init(id: "es_se_3", target: "quién", native: "kim"),
+            .init(id: "es_se_4", target: "hoy", native: "bugün"),
+            .init(id: "es_se_5", target: "ahora", native: "şimdi"),
+            .init(id: "es_se_6", target: "aquí", native: "burada")
+        ],
+        "french_marseille": [
+            .init(id: "fr_ma_1", target: "quoi", native: "ne"),
+            .init(id: "fr_ma_2", target: "où", native: "nerede"),
+            .init(id: "fr_ma_3", target: "qui", native: "kim"),
+            .init(id: "fr_ma_4", target: "aujourd'hui", native: "bugün"),
+            .init(id: "fr_ma_5", target: "maintenant", native: "şimdi"),
+            .init(id: "fr_ma_6", target: "ici", native: "burada")
         ]
     ]
 
