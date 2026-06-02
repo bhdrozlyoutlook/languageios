@@ -14,15 +14,19 @@ public struct WordCollectionView: View {
 
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
 
+    private let onReview: () -> Void
+
     public init(
         store: AppStore,
         speech: SpeechService,
         onCapture: @escaping () -> Void,
+        onReview: @escaping () -> Void = {},
         onClose: @escaping () -> Void
     ) {
         self.store = store
         self.speech = speech
         self.onCapture = onCapture
+        self.onReview = onReview
         self.onClose = onClose
     }
 
@@ -66,6 +70,16 @@ public struct WordCollectionView: View {
                 .font(.system(size: 26, weight: .black, design: .serif))
                 .foregroundStyle(OnboardingTheme.ink)
             Spacer()
+            if !objects.isEmpty {
+                Button(action: onReview) {
+                    Image(systemName: "rectangle.stack.badge.play")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(OnboardingTheme.teal)
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(OnboardingTheme.paper))
+                }
+                .accessibilityLabel("Kelimeleri tekrar et")
+            }
             Button(action: onCapture) {
                 Image(systemName: "camera.fill")
                     .font(.headline.weight(.bold))

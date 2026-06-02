@@ -14,6 +14,7 @@ public struct LearningPathView: View {
     @State private var showProfile = false
     @State private var showObjects = false
     @State private var showCollection = false
+    @State private var showReview = false
     @State private var entitlementStart: EntitlementFlowView.Screen?
     @State private var showAI = false
     @State private var showMusic = false
@@ -38,7 +39,7 @@ public struct LearningPathView: View {
 
     /// True while any sheet / full-screen cover is presented over the map.
     private var isCovered: Bool {
-        activeLesson != nil || showProfile || showObjects || showCollection || showAI || showMusic || showNoHearts || entitlementStart != nil
+        activeLesson != nil || showProfile || showObjects || showCollection || showReview || showAI || showMusic || showNoHearts || entitlementStart != nil
     }
 
     public var body: some View {
@@ -83,6 +84,9 @@ public struct LearningPathView: View {
         .sheet(isPresented: $showProfile) { profileSheet }
         .sheet(isPresented: $showObjects) { objectSheet }
         .sheet(isPresented: $showCollection) { collectionSheet }
+        .sheet(isPresented: $showReview) {
+            WordReviewView(store: store, speech: env.speech, onClose: { showReview = false })
+        }
         .sheet(item: $entitlementStart) { start in
             EntitlementFlowView(store: store, start: start, onClose: { entitlementStart = nil })
         }
@@ -125,6 +129,10 @@ public struct LearningPathView: View {
             onCapture: {
                 showCollection = false
                 requestCamera()
+            },
+            onReview: {
+                showCollection = false
+                showReview = true
             },
             onClose: { showCollection = false }
         )

@@ -298,3 +298,14 @@
 "Şarkıdan öğren" = "Learn from song";
 "Telif sebebiyle şarkı sözleri değil, sık kullanılan kalıplar öğretilir." = "For copyright reasons, common phrases are taught rather than the lyrics themselves.";
 "Şarkı" = "Song";
+
+/* ===== Word review (spaced repetition) ===== */
+"Kelime tekrarı" = "Word review";
+"Dokun ve hatırla" = "Tap to recall";
+"Biliyorum" = "I know it";
+"Tekrar edecek kelime yok" = "No words to review";
+"Önce kamerayla obje çekerek kelime biriktir." = "Capture objects with the camera to collect words first.";
+"Tekrar bitti 🎉" = "Review done 🎉";
+"%lld kelime tekrar edildi." = "Reviewed %lld words.";
+"Bitir" = "Finish";
+"Kelimeleri tekrar et" = "Review words";
