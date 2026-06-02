@@ -29,11 +29,82 @@ public struct LyricsAnalysis: Equatable {
     }
 }
 
+/// Display-only metadata for the Apple Music-style learning player.
+public struct LyricsNowPlayingDisplay: Equatable {
+    public let title: String
+    public let artist: String
+    public let queueCountText: String
+    public let progressFraction: Double
+
+    public init(title: String, artist: String, selectedIndex: Int, phraseCount: Int) {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedArtist = artist.trimmingCharacters(in: .whitespacesAndNewlines)
+        let count = max(phraseCount, 0)
+
+        self.title = trimmedTitle.isEmpty ? "Şarkı seç" : trimmedTitle
+        self.artist = trimmedArtist.isEmpty ? "Sanatçı ekle" : trimmedArtist
+        self.queueCountText = "\(count) kalıp"
+
+        guard count > 0 else {
+            self.progressFraction = 0
+            return
+        }
+
+        let clampedIndex = min(max(selectedIndex, 0), count - 1)
+        self.progressFraction = Double(clampedIndex + 1) / Double(count)
+    }
+}
+
+/// Simulated synced-lyrics timing for learnable phrases. It does not represent a real song
+/// timeline; it gives the Now Playing UI a karaoke-like flow without copyrighted lyrics.
+public struct LyricsKaraokeTimeline: Equatable {
+    public let phraseCount: Int
+    public let phraseDuration: TimeInterval
+
+    public var totalDuration: TimeInterval {
+        TimeInterval(phraseCount) * phraseDuration
+    }
+
+    public init(phraseCount: Int, phraseDuration: TimeInterval = 3.2) {
+        self.phraseCount = max(phraseCount, 0)
+        self.phraseDuration = max(phraseDuration, 0.5)
+    }
+
+    public func index(at elapsed: TimeInterval) -> Int? {
+        guard phraseCount > 0 else { return nil }
+        let clampedElapsed = min(max(elapsed, 0), max(totalDuration - 0.001, 0))
+        let rawIndex = Int(clampedElapsed / phraseDuration)
+        return min(max(rawIndex, 0), phraseCount - 1)
+    }
+
+    public func progressFraction(at elapsed: TimeInterval) -> Double {
+        guard totalDuration > 0 else { return 0 }
+        return min(max(elapsed / totalDuration, 0), 1)
+    }
+
+    public func isFinished(at elapsed: TimeInterval) -> Bool {
+        phraseCount == 0 || elapsed >= totalDuration
+    }
+
+    public func elapsedForPhrase(at index: Int) -> TimeInterval {
+        guard phraseCount > 0 else { return 0 }
+        let clampedIndex = min(max(index, 0), phraseCount - 1)
+        return TimeInterval(clampedIndex) * phraseDuration
+    }
+}
+
 /// Turns a song into a handful of common everyday phrases to learn. The default is a small
 /// on-device curated set; `GeminiLyricsProvider` swaps in for richer, song-aware results.
 /// (We teach common phrases, not copyrighted lyrics.)
 public protocol LyricsProviding: AnyObject {
-    func phrases(title: String, artist: String, language: TargetLanguage) async -> LyricsAnalysis?
+    /// `native` is the learner's own language — phrase translations come back in it.
+    func phrases(title: String, artist: String, language: TargetLanguage, native: TargetLanguage) async -> LyricsAnalysis?
+}
+
+public extension LyricsProviding {
+    func phrases(title: String, artist: String, language: TargetLanguage) async -> LyricsAnalysis? {
+        await phrases(title: title, artist: artist, language: language, native: .turkish)
+    }
 }
 
 /// Deterministic offline fallback: a few common everyday phrases per language. Works before
@@ -41,7 +112,7 @@ public protocol LyricsProviding: AnyObject {
 public final class StubLyricsProvider: LyricsProviding {
     public init() {}
 
-    public func phrases(title: String, artist: String, language: TargetLanguage) async -> LyricsAnalysis? {
+    public func phrases(title: String, artist: String, language: TargetLanguage, native: TargetLanguage) async -> LyricsAnalysis? {
         let phrases = Self.starter(for: language)
         guard !phrases.isEmpty else { return nil }
         return LyricsAnalysis(

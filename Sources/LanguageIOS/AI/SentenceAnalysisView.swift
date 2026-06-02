@@ -6,6 +6,7 @@ public struct SentenceAnalysisView: View {
     private let analyzer: SentenceAnalyzing
     private let speech: SpeechService
     private let language: TargetLanguage
+    private let native: TargetLanguage
     private let onClose: () -> Void
 
     @State private var input = ""
@@ -16,11 +17,13 @@ public struct SentenceAnalysisView: View {
         analyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer(),
         speech: SpeechService,
         language: TargetLanguage,
+        native: TargetLanguage = .turkish,
         onClose: @escaping () -> Void
     ) {
         self.analyzer = analyzer
         self.speech = speech
         self.language = language
+        self.native = native
         self.onClose = onClose
     }
 
@@ -134,7 +137,7 @@ public struct SentenceAnalysisView: View {
     private func analyze() async {
         isAnalyzing = true
         result = nil
-        result = await analyzer.analyze(input, language: language)
+        result = await analyzer.analyze(input, language: language, native: native)
         isAnalyzing = false
     }
 }

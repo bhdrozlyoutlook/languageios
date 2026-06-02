@@ -19,7 +19,14 @@ public struct SentenceAnalysis: Equatable {
 /// heuristic stub; a real LLM adapter (OpenAI/Gemini) conforms to this and is swapped in
 /// once an API key is available — no UI/call-site changes.
 public protocol SentenceAnalyzing: AnyObject {
-    func analyze(_ sentence: String, language: TargetLanguage) async -> SentenceAnalysis
+    /// `native` is the learner's own language — corrections are explained in it.
+    func analyze(_ sentence: String, language: TargetLanguage, native: TargetLanguage) async -> SentenceAnalysis
+}
+
+public extension SentenceAnalyzing {
+    func analyze(_ sentence: String, language: TargetLanguage) async -> SentenceAnalysis {
+        await analyze(sentence, language: language, native: .turkish)
+    }
 }
 
 /// Lightweight, deterministic stub: trims, capitalizes the first letter, and ensures
@@ -28,7 +35,7 @@ public protocol SentenceAnalyzing: AnyObject {
 public final class HeuristicSentenceAnalyzer: SentenceAnalyzing {
     public init() {}
 
-    public func analyze(_ sentence: String, language: TargetLanguage) async -> SentenceAnalysis {
+    public func analyze(_ sentence: String, language: TargetLanguage, native: TargetLanguage) async -> SentenceAnalysis {
         let original = sentence
         var corrected = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
         var notes: [String] = []

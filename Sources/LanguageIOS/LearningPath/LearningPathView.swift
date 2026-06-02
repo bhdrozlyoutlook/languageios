@@ -37,6 +37,12 @@ public struct LearningPathView: View {
         self.journey = LearningJourney.journey(for: language)
     }
 
+    /// The learner's own language (chosen in onboarding); drives the native-language gloss
+    /// of the AI features. Defaults to Turkish.
+    private var nativeLanguage: TargetLanguage {
+        store.userProfile()?.nativeLanguage ?? .turkish
+    }
+
     /// True while any sheet / full-screen cover is presented over the map.
     private var isCovered: Bool {
         activeLesson != nil || showProfile || showObjects || showCollection || showReview || showAI || showMusic || showNoHearts || entitlementStart != nil
@@ -91,11 +97,13 @@ public struct LearningPathView: View {
             EntitlementFlowView(store: store, start: start, onClose: { entitlementStart = nil })
         }
         .sheet(isPresented: $showAI) {
-            SentenceAnalysisView(analyzer: env.sentenceAnalyzer, speech: env.speech, language: language, onClose: { showAI = false })
+            SentenceAnalysisView(analyzer: env.sentenceAnalyzer, speech: env.speech, language: language, native: nativeLanguage, onClose: { showAI = false })
         }
-        .sheet(isPresented: $showMusic) {
-            LyricsView(provider: env.lyricsProvider, speech: env.speech, language: language, onClose: { showMusic = false })
-        }
+        #if os(iOS)
+        .fullScreenCover(isPresented: $showMusic) { musicSheet }
+        #else
+        .sheet(isPresented: $showMusic) { musicSheet }
+        #endif
     }
 
     /// Gate the camera at the entry point: a locked freemium user never reaches the
@@ -114,11 +122,22 @@ public struct LearningPathView: View {
             recognizer: env.objectRecognizer,
             speech: env.speech,
             language: language,
+            native: nativeLanguage,
             onShowCollection: {
                 showObjects = false
                 showCollection = true
             },
             onClose: { showObjects = false }
+        )
+    }
+
+    private var musicSheet: some View {
+        LyricsView(
+            provider: env.lyricsProvider,
+            speech: env.speech,
+            language: language,
+            native: nativeLanguage,
+            onClose: { showMusic = false }
         )
     }
 

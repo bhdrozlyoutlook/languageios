@@ -16,28 +16,28 @@ public final class GeminiLyricsProvider: LyricsProviding {
         self.init(client: GeminiClient(apiKey: apiKey, model: model), fallback: fallback)
     }
 
-    public func phrases(title: String, artist: String, language: TargetLanguage) async -> LyricsAnalysis? {
+    public func phrases(title: String, artist: String, language: TargetLanguage, native: TargetLanguage) async -> LyricsAnalysis? {
         do {
-            let text = try await client.generate(prompt: Self.prompt(title: title, artist: artist, language: language))
+            let text = try await client.generate(prompt: Self.prompt(title: title, artist: artist, language: language, native: native))
             if let phrases = Self.parse(text), !phrases.isEmpty {
                 return LyricsAnalysis(title: title, artist: artist, phrases: phrases)
             }
-            return await fallback.phrases(title: title, artist: artist, language: language)
+            return await fallback.phrases(title: title, artist: artist, language: language, native: native)
         } catch {
-            return await fallback.phrases(title: title, artist: artist, language: language)
+            return await fallback.phrases(title: title, artist: artist, language: language, native: native)
         }
     }
 
-    static func prompt(title: String, artist: String, language: TargetLanguage) -> String {
+    static func prompt(title: String, artist: String, language: TargetLanguage, native: TargetLanguage) -> String {
         let song = title.isEmpty ? "popular songs" : "the song \"\(title)\""
         let by = artist.isEmpty ? "" : " by \(artist)"
         return """
-        A Turkish speaker is learning \(language.englishName). Without reproducing any
-        copyrighted lyrics, list 6 short, common everyday phrases or expressions in
+        A \(native.englishName) speaker is learning \(language.englishName). Without reproducing
+        any copyrighted lyrics, list 6 short, common everyday phrases or expressions in
         \(language.englishName) of the kind that appear in \(song)\(by). For each give a brief
-        Turkish translation and a one-line usage note in Turkish.
+        \(native.englishName) translation and a one-line usage note in \(native.englishName).
         Respond ONLY with JSON, no markdown:
-        {"phrases":[{"phrase":"<phrase in \(language.englishName)>","native":"<Turkish>","note":"<short Turkish note>"}]}
+        {"phrases":[{"phrase":"<phrase in \(language.englishName)>","native":"<\(native.englishName)>","note":"<short note in \(native.englishName)>"}]}
         """
     }
 

@@ -16,28 +16,28 @@ public final class GeminiSentenceAnalyzer: SentenceAnalyzing {
         self.init(client: GeminiClient(apiKey: apiKey, model: model), fallback: fallback)
     }
 
-    public func analyze(_ sentence: String, language: TargetLanguage) async -> SentenceAnalysis {
+    public func analyze(_ sentence: String, language: TargetLanguage, native: TargetLanguage) async -> SentenceAnalysis {
         let trimmed = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             return SentenceAnalysis(original: sentence, corrected: sentence, isCorrect: true, notes: [])
         }
         do {
-            let text = try await client.generate(prompt: Self.prompt(sentence: trimmed, language: language))
+            let text = try await client.generate(prompt: Self.prompt(sentence: trimmed, language: language, native: native))
             if let analysis = Self.parse(text, original: sentence) { return analysis }
-            return await fallback.analyze(sentence, language: language)
+            return await fallback.analyze(sentence, language: language, native: native)
         } catch {
-            return await fallback.analyze(sentence, language: language)
+            return await fallback.analyze(sentence, language: language, native: native)
         }
     }
 
-    static func prompt(sentence: String, language: TargetLanguage) -> String {
+    static func prompt(sentence: String, language: TargetLanguage, native: TargetLanguage) -> String {
         """
-        A Turkish speaker is learning \(language.englishName). Correct their sentence and \
-        briefly explain each fix in Turkish.
+        A \(native.englishName) speaker is learning \(language.englishName). Correct their \
+        sentence and briefly explain each fix in \(native.englishName).
         Sentence: "\(sentence)"
         Respond ONLY with JSON, no markdown:
         {"corrected": "<corrected sentence>", "isCorrect": <true if no change needed>, \
-        "notes": ["<short Turkish explanation>", ...]}
+        "notes": ["<short explanation in \(native.englishName)>", ...]}
         """
     }
 
