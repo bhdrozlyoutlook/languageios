@@ -180,6 +180,150 @@ enum LessonContent {
             .init(id: "fr_ma_4", target: "aujourd'hui", native: "bugün"),
             .init(id: "fr_ma_5", target: "maintenant", native: "şimdi"),
             .init(id: "fr_ma_6", target: "ici", native: "burada")
+        ],
+
+        // ===== English (UK): cities 3–7 =====
+        "englishUK_manchester": [   // Günlük diyaloglar
+            .init(id: "uk_ma_1", target: "what", native: "ne"),
+            .init(id: "uk_ma_2", target: "where", native: "nerede"),
+            .init(id: "uk_ma_3", target: "who", native: "kim"),
+            .init(id: "uk_ma_4", target: "today", native: "bugün"),
+            .init(id: "uk_ma_5", target: "now", native: "şimdi"),
+            .init(id: "uk_ma_6", target: "here", native: "burada")
+        ],
+        "englishUK_liverpool": [    // Alışveriş ve sayılar
+            .init(id: "uk_li_1", target: "one", native: "bir"),
+            .init(id: "uk_li_2", target: "two", native: "iki"),
+            .init(id: "uk_li_3", target: "three", native: "üç"),
+            .init(id: "uk_li_4", target: "money", native: "para"),
+            .init(id: "uk_li_5", target: "how much", native: "ne kadar"),
+            .init(id: "uk_li_6", target: "expensive", native: "pahalı")
+        ],
+        "englishUK_edinburgh": [    // Yemek ve içecek
+            .init(id: "uk_ed_1", target: "to eat", native: "yemek"),
+            .init(id: "uk_ed_2", target: "to drink", native: "içmek"),
+            .init(id: "uk_ed_3", target: "bread", native: "ekmek"),
+            .init(id: "uk_ed_4", target: "coffee", native: "kahve"),
+            .init(id: "uk_ed_5", target: "breakfast", native: "kahvaltı"),
+            .init(id: "uk_ed_6", target: "delicious", native: "lezzetli")
+        ],
+        "englishUK_bristol": [      // Yön ve ulaşım
+            .init(id: "uk_br_1", target: "left", native: "sol"),
+            .init(id: "uk_br_2", target: "right", native: "sağ"),
+            .init(id: "uk_br_3", target: "station", native: "istasyon"),
+            .init(id: "uk_br_4", target: "ticket", native: "bilet"),
+            .init(id: "uk_br_5", target: "where is", native: "nerede"),
+            .init(id: "uk_br_6", target: "help", native: "yardım")
+        ],
+        "englishUK_cambridge": [    // Zaman ve hava
+            .init(id: "uk_ca_1", target: "time", native: "zaman"),
+            .init(id: "uk_ca_2", target: "day", native: "gün"),
+            .init(id: "uk_ca_3", target: "tomorrow", native: "yarın"),
+            .init(id: "uk_ca_4", target: "hot", native: "sıcak"),
+            .init(id: "uk_ca_5", target: "cold", native: "soğuk"),
+            .init(id: "uk_ca_6", target: "beautiful", native: "güzel")
+        ],
+
+        // ===== Almanca: cities 4–7 =====
+        "german_hamburg": [         // Alışveriş ve sayılar
+            .init(id: "de_ha_1", target: "eins", native: "bir"),
+            .init(id: "de_ha_2", target: "zwei", native: "iki"),
+            .init(id: "de_ha_3", target: "drei", native: "üç"),
+            .init(id: "de_ha_4", target: "Geld", native: "para"),
+            .init(id: "de_ha_5", target: "wie viel", native: "ne kadar"),
+            .init(id: "de_ha_6", target: "teuer", native: "pahalı")
+        ],
+        "german_frankfurt": [       // Yemek ve içecek
+            .init(id: "de_fr_1", target: "essen", native: "yemek"),
+            .init(id: "de_fr_2", target: "trinken", native: "içmek"),
+            .init(id: "de_fr_3", target: "Brot", native: "ekmek"),
+            .init(id: "de_fr_4", target: "Kaffee", native: "kahve"),
+            .init(id: "de_fr_5", target: "Frühstück", native: "kahvaltı"),
+            .init(id: "de_fr_6", target: "lecker", native: "lezzetli")
+        ],
+        "german_stuttgart": [       // Yön ve ulaşım
+            .init(id: "de_st_1", target: "links", native: "sol"),
+            .init(id: "de_st_2", target: "rechts", native: "sağ"),
+            .init(id: "de_st_3", target: "Bahnhof", native: "istasyon"),
+            .init(id: "de_st_4", target: "Fahrkarte", native: "bilet"),
+            .init(id: "de_st_5", target: "wo ist", native: "nerede"),
+            .init(id: "de_st_6", target: "Hilfe", native: "yardım")
+        ],
+        "german_dresden": [         // Zaman ve hava
+            .init(id: "de_dr_1", target: "Zeit", native: "zaman"),
+            .init(id: "de_dr_2", target: "Tag", native: "gün"),
+            .init(id: "de_dr_3", target: "morgen", native: "yarın"),
+            .init(id: "de_dr_4", target: "heiß", native: "sıcak"),
+            .init(id: "de_dr_5", target: "kalt", native: "soğuk"),
+            .init(id: "de_dr_6", target: "schön", native: "güzel")
+        ],
+
+        // ===== İspanyolca: cities 4–7 =====
+        "spanish_valencia": [       // Alışveriş ve sayılar
+            .init(id: "es_va_1", target: "uno", native: "bir"),
+            .init(id: "es_va_2", target: "dos", native: "iki"),
+            .init(id: "es_va_3", target: "tres", native: "üç"),
+            .init(id: "es_va_4", target: "dinero", native: "para"),
+            .init(id: "es_va_5", target: "cuánto", native: "ne kadar"),
+            .init(id: "es_va_6", target: "caro", native: "pahalı")
+        ],
+        "spanish_bilbao": [         // Yemek ve içecek
+            .init(id: "es_bi_1", target: "comer", native: "yemek"),
+            .init(id: "es_bi_2", target: "beber", native: "içmek"),
+            .init(id: "es_bi_3", target: "pan", native: "ekmek"),
+            .init(id: "es_bi_4", target: "café", native: "kahve"),
+            .init(id: "es_bi_5", target: "desayuno", native: "kahvaltı"),
+            .init(id: "es_bi_6", target: "delicioso", native: "lezzetli")
+        ],
+        "spanish_granada": [        // Yön ve ulaşım
+            .init(id: "es_gr_1", target: "izquierda", native: "sol"),
+            .init(id: "es_gr_2", target: "derecha", native: "sağ"),
+            .init(id: "es_gr_3", target: "estación", native: "istasyon"),
+            .init(id: "es_gr_4", target: "billete", native: "bilet"),
+            .init(id: "es_gr_5", target: "dónde está", native: "nerede"),
+            .init(id: "es_gr_6", target: "ayuda", native: "yardım")
+        ],
+        "spanish_malaga": [         // Zaman ve hava
+            .init(id: "es_mg_1", target: "tiempo", native: "zaman"),
+            .init(id: "es_mg_2", target: "día", native: "gün"),
+            .init(id: "es_mg_3", target: "mañana", native: "yarın"),
+            .init(id: "es_mg_4", target: "caliente", native: "sıcak"),
+            .init(id: "es_mg_5", target: "frío", native: "soğuk"),
+            .init(id: "es_mg_6", target: "bonito", native: "güzel")
+        ],
+
+        // ===== Fransızca: cities 4–7 =====
+        "french_bordeaux": [        // Alışveriş ve sayılar
+            .init(id: "fr_bo_1", target: "un", native: "bir"),
+            .init(id: "fr_bo_2", target: "deux", native: "iki"),
+            .init(id: "fr_bo_3", target: "trois", native: "üç"),
+            .init(id: "fr_bo_4", target: "argent", native: "para"),
+            .init(id: "fr_bo_5", target: "combien", native: "ne kadar"),
+            .init(id: "fr_bo_6", target: "cher", native: "pahalı")
+        ],
+        "french_nice": [            // Yemek ve içecek
+            .init(id: "fr_ni_1", target: "manger", native: "yemek"),
+            .init(id: "fr_ni_2", target: "boire", native: "içmek"),
+            .init(id: "fr_ni_3", target: "pain", native: "ekmek"),
+            .init(id: "fr_ni_4", target: "café", native: "kahve"),
+            .init(id: "fr_ni_5", target: "petit-déjeuner", native: "kahvaltı"),
+            .init(id: "fr_ni_6", target: "délicieux", native: "lezzetli")
+        ],
+        "french_toulouse": [        // Yön ve ulaşım
+            .init(id: "fr_to_1", target: "gauche", native: "sol"),
+            .init(id: "fr_to_2", target: "droite", native: "sağ"),
+            .init(id: "fr_to_3", target: "gare", native: "istasyon"),
+            .init(id: "fr_to_4", target: "billet", native: "bilet"),
+            .init(id: "fr_to_5", target: "où est", native: "nerede"),
+            .init(id: "fr_to_6", target: "aide", native: "yardım")
+        ],
+        "french_strasbourg": [      // Zaman ve hava
+            .init(id: "fr_sb_1", target: "temps", native: "zaman"),
+            .init(id: "fr_sb_2", target: "jour", native: "gün"),
+            .init(id: "fr_sb_3", target: "demain", native: "yarın"),
+            .init(id: "fr_sb_4", target: "chaud", native: "sıcak"),
+            .init(id: "fr_sb_5", target: "froid", native: "soğuk"),
+            .init(id: "fr_sb_6", target: "beau", native: "güzel")
         ]
     ]
 

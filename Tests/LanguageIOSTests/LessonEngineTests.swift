@@ -75,10 +75,11 @@ final class LessonEngineTests: XCTestCase {
     }
 
     func testUnauthoredStopFallsBackToLanguageBank() {
-        // A later German stop has no authored content → uses the starter bank.
-        let stop = LearningJourney.journey(for: .german).stops[5]
-        let lesson = LessonBuilder.build(for: stop, language: .german)
-        XCTAssertTrue(lesson.items.contains { $0.id == "de_starter_0" })
+        // A late US state has no authored content → uses the starter bank. (Every non-US
+        // city journey is now fully authored, so the fallback is exercised on a US state.)
+        let stop = LearningJourney.journey(for: .englishUS).stops[40]
+        let lesson = LessonBuilder.build(for: stop, language: .englishUS)
+        XCTAssertTrue(lesson.items.contains { $0.id == "en_starter_0" })
     }
 
     func testExpandedAuthoredStopsAreAvailable() {
