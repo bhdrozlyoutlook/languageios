@@ -74,8 +74,8 @@ final class CaptureRepositoryTests: XCTestCase {
     }
 
     func testImageNormalizerReturnsInputForNonImageData() {
-        // Non-decodable bytes can't be oriented, so they pass through untouched.
+        // Non-decodable bytes can't be oriented/scaled, so they pass through untouched.
         let junk = Data([0x00, 0x11, 0x22, 0x33])
-        XCTAssertEqual(ImageNormalizer.upright(junk), junk)
+        XCTAssertEqual(ImageNormalizer.prepared(junk), junk)
     }
 }

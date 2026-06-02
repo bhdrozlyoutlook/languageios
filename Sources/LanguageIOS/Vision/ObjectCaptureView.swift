@@ -393,9 +393,9 @@ public struct ObjectCaptureView: View {
     // MARK: Actions
 
     private func process(_ rawData: Data) async {
-        // Bake EXIF orientation in first, so the cutout / recognizer never see a sideways
-        // image (fixes the 90°-rotated sticker).
-        let data = ImageNormalizer.upright(rawData)
+        // Upright + downscale first: fixes the 90°-rotated cutout and keeps scanning fast
+        // (no multi-megapixel upload to Gemini / mask on a huge image).
+        let data = ImageNormalizer.prepared(rawData)
         withAnimation(.easeInOut(duration: 0.25)) { phase = .processing(data) }
         async let cutoutTask = extractor.extractSubject(from: data)
         async let recognitionTask = recognizer.recognize(data, target: language, native: native)
@@ -448,42 +448,58 @@ private struct ReticleBrackets: Shape {
     }
 }
 
-/// Animated "scanning" overlay shown while the captured object is being recognized:
-/// dim wash, a centered reticle, and a bright line sweeping up and down the frame.
+/// Animated "scanning" overlay shown while the captured object is being recognized: a
+/// soft wash, a gently breathing reticle, and a glowing band sweeping inside the frame.
 private struct ScanningOverlay: View {
-    @State private var sweep = false
+    @State private var sweep: CGFloat = 0   // 0 (top) … 1 (bottom), within the reticle
+    @State private var pulse = false
+
+    private let bandHeightRatio: CGFloat = 0.4
 
     var body: some View {
         GeometryReader { geo in
-            let reticle = min(geo.size.width, geo.size.height) * 0.66
+            let side = min(geo.size.width, geo.size.height) * 0.7
+            let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+            let bandHeight = side * bandHeightRatio
+
             ZStack {
-                Color.black.opacity(0.30).ignoresSafeArea()
+                Color.black.opacity(0.22).ignoresSafeArea()
+
+                // Glowing scan band, clipped to the reticle square so it reads as contained.
+                VStack {
+                    LinearGradient(
+                        colors: [OnboardingTheme.teal.opacity(0), OnboardingTheme.teal.opacity(0.40)],
+                        startPoint: .top, endPoint: .bottom
+                    )
+                    .frame(height: bandHeight)
+                    .overlay(alignment: .bottom) {
+                        Rectangle()
+                            .fill(LinearGradient(
+                                colors: [OnboardingTheme.teal.opacity(0.2), .white, OnboardingTheme.teal.opacity(0.2)],
+                                startPoint: .leading, endPoint: .trailing
+                            ))
+                            .frame(height: 2.5)
+                            .shadow(color: .white.opacity(0.9), radius: 6)
+                            .shadow(color: OnboardingTheme.teal, radius: 10)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .frame(width: side, height: side, alignment: .top)
+                .offset(y: (sweep - 0.5) * (side - bandHeight))
+                .frame(width: side, height: side)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .position(center)
 
                 ReticleBrackets()
-                    .stroke(Color.white.opacity(0.85), style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                    .frame(width: reticle, height: reticle)
-                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
-
-                LinearGradient(
-                    colors: [
-                        .clear,
-                        OnboardingTheme.teal.opacity(0.85),
-                        .white.opacity(0.95),
-                        OnboardingTheme.teal.opacity(0.85),
-                        .clear,
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: 130)
-                .blur(radius: 2)
-                .frame(maxWidth: .infinity)
-                .position(x: geo.size.width / 2, y: sweep ? geo.size.height * 0.82 : geo.size.height * 0.18)
-                .shadow(color: OnboardingTheme.teal.opacity(0.6), radius: 12)
+                    .stroke(Color.white.opacity(0.92), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .frame(width: side, height: side)
+                    .scaleEffect(pulse ? 1.03 : 0.98)
+                    .position(center)
+                    .shadow(color: .black.opacity(0.25), radius: 4)
             }
             .onAppear {
-                withAnimation(.easeInOut(duration: 1.05).repeatForever(autoreverses: true)) {
-                    sweep = true
-                }
+                withAnimation(.easeInOut(duration: 1.25).repeatForever(autoreverses: true)) { sweep = 1 }
+                withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) { pulse = true }
             }
         }
         .allowsHitTesting(false)
