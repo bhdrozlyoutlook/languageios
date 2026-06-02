@@ -1,6 +1,17 @@
 import Foundation
 
 /// Lightweight app settings: whether onboarding is done and the last chosen language.
+/// A locally stored account (e.g. from Sign in with Apple). Offline-first: no backend.
+public struct Account: Equatable {
+    public let appleUserId: String
+    public let displayName: String?
+
+    public init(appleUserId: String, displayName: String?) {
+        self.appleUserId = appleUserId
+        self.displayName = displayName
+    }
+}
+
 public protocol SettingsRepository: AnyObject {
     var hasCompletedOnboarding: Bool { get }
     func setOnboardingCompleted(_ value: Bool) throws
@@ -10,6 +21,10 @@ public protocol SettingsRepository: AnyObject {
 
     var dailyReminderEnabled: Bool { get }
     func setDailyReminderEnabled(_ value: Bool) throws
+
+    var account: Account? { get }
+    func setAccount(_ account: Account) throws
+    func clearAccount() throws
 }
 
 struct SettingsBlob: Codable, Equatable {
@@ -17,11 +32,21 @@ struct SettingsBlob: Codable, Equatable {
     var lastTargetLanguageRaw: String?
     /// `nil` (legacy/default) is treated as enabled.
     var dailyReminderEnabled: Bool?
+    var appleUserId: String?
+    var displayName: String?
 
-    init(hasCompletedOnboarding: Bool = false, lastTargetLanguageRaw: String? = nil, dailyReminderEnabled: Bool? = nil) {
+    init(
+        hasCompletedOnboarding: Bool = false,
+        lastTargetLanguageRaw: String? = nil,
+        dailyReminderEnabled: Bool? = nil,
+        appleUserId: String? = nil,
+        displayName: String? = nil
+    ) {
         self.hasCompletedOnboarding = hasCompletedOnboarding
         self.lastTargetLanguageRaw = lastTargetLanguageRaw
         self.dailyReminderEnabled = dailyReminderEnabled
+        self.appleUserId = appleUserId
+        self.displayName = displayName
     }
 }
 
@@ -61,6 +86,26 @@ public final class UserDefaultsSettingsRepository: SettingsRepository {
     public func setDailyReminderEnabled(_ value: Bool) throws {
         var blob = load()
         blob.dailyReminderEnabled = value
+        try persist(blob)
+    }
+
+    public var account: Account? {
+        let blob = load()
+        guard let appleUserId = blob.appleUserId else { return nil }
+        return Account(appleUserId: appleUserId, displayName: blob.displayName)
+    }
+
+    public func setAccount(_ account: Account) throws {
+        var blob = load()
+        blob.appleUserId = account.appleUserId
+        blob.displayName = account.displayName
+        try persist(blob)
+    }
+
+    public func clearAccount() throws {
+        var blob = load()
+        blob.appleUserId = nil
+        blob.displayName = nil
         try persist(blob)
     }
 

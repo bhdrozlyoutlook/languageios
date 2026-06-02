@@ -139,6 +139,29 @@ public final class AppStore {
         analytics.track(AnalyticsEvent(name: "object_word_captured", params: ["word": english]))
     }
 
+    // MARK: Account (local, offline-first)
+
+    public var isSignedIn: Bool { settings.account != nil }
+    public var displayName: String? { settings.account?.displayName }
+
+    public func signIn(appleUserId: String, displayName: String?) {
+        do {
+            try settings.setAccount(Account(appleUserId: appleUserId, displayName: displayName))
+        } catch {
+            handle(error, context: "signIn", fallbackKey: PersistenceSchema.settingsKey)
+        }
+        analytics.track(AnalyticsEvent(name: "account_signed_in", params: ["provider": "apple"]))
+    }
+
+    public func signOut() {
+        do {
+            try settings.clearAccount()
+        } catch {
+            handle(error, context: "signOut", fallbackKey: PersistenceSchema.settingsKey)
+        }
+        analytics.track(AnalyticsEvent(name: "account_signed_out"))
+    }
+
     // MARK: Profile & stats
 
     public var totalStars: Int { gamification.starsByStop.values.reduce(0, +) }

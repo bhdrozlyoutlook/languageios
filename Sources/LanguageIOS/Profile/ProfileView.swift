@@ -41,6 +41,7 @@ public struct ProfileView: View {
                         profileSection(profile)
                     }
                     reminderSection
+                    accountSection
                     languageSwitcher
                     restartButton
                 }
@@ -266,6 +267,29 @@ public struct ProfileView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(language.title)\(language == currentLanguage ? ", seçili" : "")")
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var accountSection: some View {
+        if store.isSignedIn {
+            section(title: "Hesap") {
+                infoRow(
+                    icon: "person.crop.circle.fill",
+                    label: "Giriş",
+                    value: store.displayName ?? "Apple ile giriş yapıldı"
+                )
+                Button { store.signOut() } label: {
+                    Text("Çıkış yap")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(OnboardingTheme.coral)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(OnboardingTheme.paper))
+                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(OnboardingTheme.coral.opacity(0.4), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
             }
         }
     }

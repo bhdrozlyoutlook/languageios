@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(AuthenticationServices)
+import AuthenticationServices
+#endif
 
 public struct OnboardingView: View {
     @State private var flow = OnboardingFlowState(
@@ -1070,6 +1073,7 @@ private struct OneShotTypewriterText: View {
 private struct AuthChoiceView: View {
     @Binding var message: String?
     let onContinue: (String) -> Void
+    @Environment(\.appEnvironment) private var env
 
     var body: some View {
         VStack(spacing: 22) {
@@ -1086,11 +1090,22 @@ private struct AuthChoiceView: View {
             Spacer()
 
             VStack(spacing: 14) {
+                #if canImport(AuthenticationServices)
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.fullName]
+                } onCompletion: { result in
+                    handleAppleResult(result)
+                }
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 56)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                #else
                 AuthProviderButton(
                     logo: .apple,
                     title: "Apple ile devam et",
                     style: .primary
                 ) { onContinue("apple") }
+                #endif
 
                 AuthProviderButton(
                     logo: .google,
@@ -1122,6 +1137,23 @@ private struct AuthChoiceView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+
+    #if canImport(AuthenticationServices)
+    private func handleAppleResult(_ result: Result<ASAuthorization, Error>) {
+        guard case .success(let authorization) = result,
+              let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            message = "Apple ile giriş tamamlanamadı."
+            return
+        }
+        let name = [credential.fullName?.givenName, credential.fullName?.familyName]
+            .compactMap { $0 }
+            .joined(separator: " ")
+        try? env.settingsRepository.setAccount(
+            Account(appleUserId: credential.user, displayName: name.isEmpty ? nil : name)
+        )
+        onContinue("apple")
+    }
+    #endif
 }
 
 private struct TypewriterTitleView: View {
