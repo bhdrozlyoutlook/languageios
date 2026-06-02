@@ -757,10 +757,10 @@ private struct PersonalPlanSummaryView: View {
 
     private var heroPhrases: [String] {
         [
-            "Profilini inceliyorum...",
-            "En verimli yolu hesaplıyorum...",
-            "Plan hazırlanıyor...",
-            "Planın hazır 🎉"
+            String(localized: "Profilini inceliyorum..."),
+            String(localized: "En verimli yolu hesaplıyorum..."),
+            String(localized: "Plan hazırlanıyor..."),
+            String(localized: "Planın hazır 🎉")
         ]
     }
 
@@ -842,17 +842,17 @@ private struct PersonalPlanSummaryView: View {
     private func profileChips() -> [Chip] {
         var result: [Chip] = []
         if let lang = profile.targetLanguage {
-            result.append(.init(icon: "globe", label: "Hedef dil", value: "\(lang.flag) \(lang.title)"))
+            result.append(.init(icon: "globe", label: String(localized: "Hedef dil"), value: "\(lang.flag) \(lang.title)"))
         }
         if let age = profile.ageRange {
-            result.append(.init(icon: "person.fill", label: "Yaş", value: age.title))
+            result.append(.init(icon: "person.fill", label: String(localized: "Yaş"), value: age.title))
         }
         if let goal = profile.dailyGoal {
-            result.append(.init(icon: "clock.fill", label: "Günlük hedef", value: goal.title))
+            result.append(.init(icon: "clock.fill", label: String(localized: "Günlük hedef"), value: goal.title))
         }
         if !profile.learningPurposes.isEmpty {
             let count = profile.learningPurposes.count
-            result.append(.init(icon: "target", label: "Amaç", value: "\(count) sebep"))
+            result.append(.init(icon: "target", label: String(localized: "Amaç"), value: String(localized: "\(count) sebep")))
         }
         return result
     }
@@ -895,19 +895,19 @@ private struct PersonalPlanSummaryView: View {
         let goalMin = profile.dailyGoal?.rawValue ?? 15
         switch id {
         case "camera":
-            return "Günde 5-7 obje etiketleyerek 1 ay sonra ~150 yeni kelime ekleyebilirsin. Görsel hafızan en güçlü öğrenme yolun."
+            return String(localized: "Günde 5-7 obje etiketleyerek 1 ay sonra ~150 yeni kelime ekleyebilirsin. Görsel hafızan en güçlü öğrenme yolun.")
         case "music":
-            return "Haftada 2-3 sevdiğin şarkıyı birlikte inceleyelim. Her şarkıdan ortalama 8-10 günlük ifade çıkar."
+            return String(localized: "Haftada 2-3 sevdiğin şarkıyı birlikte inceleyelim. Her şarkıdan ortalama 8-10 günlük ifade çıkar.")
         case "voice":
-            return "Günlük \(goalMin) dakikanın 3-5'i sesli pratik. Telaffuzun ve dinleme kasın ay sonu belirgin gelişir."
+            return String(localized: "Günlük \(goalMin) dakikanın 3-5'i sesli pratik. Telaffuzun ve dinleme kasın ay sonu belirgin gelişir.")
         case "ai":
-            return "Yazdığın her cümle AI analiziyle anında geri dönüş alır. Tekrar eden hataların kişisel bir öğrenme listesi olur."
+            return String(localized: "Yazdığın her cümle AI analiziyle anında geri dönüş alır. Tekrar eden hataların kişisel bir öğrenme listesi olur.")
         case "lessons":
-            return "\(goalMin) dakikalık konsantre seanslarla 3 ay sonra temel sohbet, 6 ay sonra rahat ifade seviyesine ulaşırsın."
+            return String(localized: "\(goalMin) dakikalık konsantre seanslarla 3 ay sonra temel sohbet, 6 ay sonra rahat ifade seviyesine ulaşırsın.")
         case "goal":
-            return "Tutarlı \(goalMin) dakika = haftada ~\(goalMin * 7) dk = ay sonu ciddi mesafe. Küçük adımlar büyük fark yaratır."
+            return String(localized: "Tutarlı \(goalMin) dakika = haftada ~\(goalMin * 7) dk = ay sonu ciddi mesafe. Küçük adımlar büyük fark yaratır.")
         default:
-            return "Bu seçim, planının önemli bir parçası."
+            return String(localized: "Bu seçim, planının önemli bir parçası.")
         }
     }
 
@@ -1079,7 +1079,7 @@ private struct AuthChoiceView: View {
         VStack(spacing: 22) {
             Spacer()
 
-            TypewriterTitleView(texts: ["Dinleyerek öğren", "Yabancı arkadaşlar edin"])
+            TypewriterTitleView(texts: [String(localized: "Dinleyerek öğren"), String(localized: "Yabancı arkadaşlar edin")])
 
             Text("İlerlemen, etiketlerin ve öğrenme geçmişin hesabında saklanır.")
                 .font(.body)
@@ -1142,7 +1142,7 @@ private struct AuthChoiceView: View {
     private func handleAppleResult(_ result: Result<ASAuthorization, Error>) {
         guard case .success(let authorization) = result,
               let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-            message = "Apple ile giriş tamamlanamadı."
+            message = String(localized: "Apple ile giriş tamamlanamadı.")
             return
         }
         let name = [credential.fullName?.givenName, credential.fullName?.familyName]

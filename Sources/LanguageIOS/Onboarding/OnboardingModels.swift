@@ -442,48 +442,48 @@ public struct OnboardingProfile: Equatable {
         if learningStyles.contains(.cameraObjects) {
             cards.append(.init(
                 id: "camera",
-                title: "Gerçek dünyadan kelime yakalama",
-                detail: "Kamerayla gördüğün objeleri etiketleyip tekrar listene ekle."
+                title: String(localized: "Gerçek dünyadan kelime yakalama"),
+                detail: String(localized: "Kamerayla gördüğün objeleri etiketleyip tekrar listene ekle.")
             ))
         }
 
         if learningStyles.contains(.musicLyrics) {
             cards.append(.init(
                 id: "music",
-                title: "Şarkı sözleriyle kalıp öğrenme",
-                detail: "Dinlediğin müziklerdeki kelimeleri Türkçe ve hedef dil arasında keşfet."
+                title: String(localized: "Şarkı sözleriyle kalıp öğrenme"),
+                detail: String(localized: "Dinlediğin müziklerdeki kelimeleri Türkçe ve hedef dil arasında keşfet.")
             ))
         }
 
         if learningStyles.contains(.speakingPractice) {
             cards.append(.init(
                 id: "voice",
-                title: "Native telaffuz ve sesli tekrar",
-                detail: "Doğal sesleri dinleyip kendi konuşmanı pratik et."
+                title: String(localized: "Native telaffuz ve sesli tekrar"),
+                detail: String(localized: "Doğal sesleri dinleyip kendi konuşmanı pratik et.")
             ))
         }
 
         if learningStyles.contains(.aiExplanations) {
             cards.append(.init(
                 id: "ai",
-                title: "AI ile hata analizi",
-                detail: "Cümlelerini analiz ettir, hatalarını kısa açıklamalarla öğren."
+                title: String(localized: "AI ile hata analizi"),
+                detail: String(localized: "Cümlelerini analiz ettir, hatalarını kısa açıklamalarla öğren.")
             ))
         }
 
         if learningStyles.contains(.dailyLessons) || cards.isEmpty {
             cards.append(.init(
                 id: "lessons",
-                title: "Kısa günlük dersler",
-                detail: "Her gün küçük ve tamamlanabilir pratiklerle ritim kur."
+                title: String(localized: "Kısa günlük dersler"),
+                detail: String(localized: "Her gün küçük ve tamamlanabilir pratiklerle ritim kur.")
             ))
         }
 
         if let dailyGoal {
             cards.append(.init(
                 id: "goal",
-                title: "\(dailyGoal.rawValue) dakikalık günlük ritim",
-                detail: "Planın günlük hedefini koruyacak şekilde ayarlanır."
+                title: String(localized: "\(dailyGoal.rawValue) dakikalık günlük ritim"),
+                detail: String(localized: "Planın günlük hedefini koruyacak şekilde ayarlanır.")
             ))
         }
 

@@ -213,8 +213,8 @@ public extension LearningJourney {
 
     private static func make(
         _ language: TargetLanguage,
-        title: String,
-        tagline: String,
+        title: String.LocalizationValue,
+        tagline: String.LocalizationValue,
         places: [(slug: String, title: String)]
     ) -> LearningJourney {
         let stops = places.enumerated().map { index, place -> LearningStop in
@@ -229,7 +229,7 @@ public extension LearningJourney {
                 artwork: StopArtwork(baseImageName: base, layerImageNames: layers)
             )
         }
-        return LearningJourney(language: language, title: title, tagline: tagline, stops: stops)
+        return LearningJourney(language: language, title: String(localized: title), tagline: String(localized: tagline), stops: stops)
     }
 }
 

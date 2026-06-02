@@ -170,3 +170,52 @@
 "Giriş" = "Signed in";
 "Apple ile giriş yapıldı" = "Signed in with Apple";
 "Vazgeç" = "Cancel";
+"Saat seç" = "Pick a time";
+
+/* ===== Journey titles / taglines ===== */
+"Amerika yolculuğun" = "Your American journey";
+"İngiltere yolculuğun" = "Your British journey";
+"Almanya yolculuğun" = "Your German journey";
+"İspanya yolculuğun" = "Your Spanish journey";
+"Fransa yolculuğun" = "Your French journey";
+"Türkiye yolculuğun" = "Your Turkish journey";
+"50 eyalette batıdan doğuya İngilizce" = "English from west to east across 50 states";
+"Şehir şehir İngiliz İngilizcesi" = "British English, city by city";
+"Şehir şehir Almanca öğren" = "Learn German, city by city";
+"Şehir şehir İspanyolca öğren" = "Learn Spanish, city by city";
+"Şehir şehir Fransızca öğren" = "Learn French, city by city";
+"Şehir şehir Türkçe öğren" = "Learn Turkish, city by city";
+
+/* ===== Auth screen ===== */
+"Google ile devam et" = "Continue with Google";
+"E-posta ile devam et" = "Continue with email";
+"Zaten hesabım var" = "I already have an account";
+"Dinleyerek öğren" = "Learn by listening";
+"Yabancı arkadaşlar edin" = "Make friends abroad";
+"Apple ile giriş tamamlanamadı." = "Couldn't complete Sign in with Apple.";
+
+/* ===== Plan summary ===== */
+"Profilini inceliyorum..." = "Analyzing your profile...";
+"En verimli yolu hesaplıyorum..." = "Calculating the most efficient path...";
+"Plan hazırlanıyor..." = "Preparing your plan...";
+"Planın hazır 🎉" = "Your plan is ready 🎉";
+"Hedef dil" = "Target language";
+"Eğitim Planınız" = "Your Learning Plan";
+"Gerçek dünyadan kelime yakalama" = "Capture words from the real world";
+"Kamerayla gördüğün objeleri etiketleyip tekrar listene ekle." = "Label objects you see with the camera and add them to your review list.";
+"Şarkı sözleriyle kalıp öğrenme" = "Learn phrases from lyrics";
+"Dinlediğin müziklerdeki kelimeleri Türkçe ve hedef dil arasında keşfet." = "Discover the words in the music you listen to, between Turkish and the target language.";
+"Native telaffuz ve sesli tekrar" = "Native pronunciation and voice practice";
+"Doğal sesleri dinleyip kendi konuşmanı pratik et." = "Listen to natural voices and practice your own speaking.";
+"AI ile hata analizi" = "Mistake analysis with AI";
+"Cümlelerini analiz ettir, hatalarını kısa açıklamalarla öğren." = "Have your sentences analyzed and learn your mistakes with short explanations.";
+"Her gün küçük ve tamamlanabilir pratiklerle ritim kur." = "Build a rhythm with small, completable practices every day.";
+"%lld dakikalık günlük ritim" = "A %lld-minute daily rhythm";
+"Planın günlük hedefini koruyacak şekilde ayarlanır." = "Adjusted to keep your plan's daily goal.";
+"Günde 5-7 obje etiketleyerek 1 ay sonra ~150 yeni kelime ekleyebilirsin. Görsel hafızan en güçlü öğrenme yolun." = "By labeling 5-7 objects a day, you can add ~150 new words in a month. Your visual memory is your strongest path.";
+"Haftada 2-3 sevdiğin şarkıyı birlikte inceleyelim. Her şarkıdan ortalama 8-10 günlük ifade çıkar." = "Let's study 2-3 songs you love each week. Each song yields about 8-10 everyday phrases.";
+"Günlük %lld dakikanın 3-5'i sesli pratik. Telaffuzun ve dinleme kasın ay sonu belirgin gelişir." = "3-5 of your daily %lld minutes is voice practice. Your pronunciation and listening noticeably improve by month's end.";
+"Yazdığın her cümle AI analiziyle anında geri dönüş alır. Tekrar eden hataların kişisel bir öğrenme listesi olur." = "Every sentence you write gets instant feedback from AI analysis. Your recurring mistakes become a personal learning list.";
+"%lld dakikalık konsantre seanslarla 3 ay sonra temel sohbet, 6 ay sonra rahat ifade seviyesine ulaşırsın." = "With %lld-minute focused sessions, you reach basic conversation in 3 months and comfortable expression in 6.";
+"Tutarlı %lld dakika = haftada ~%lld dk = ay sonu ciddi mesafe. Küçük adımlar büyük fark yaratır." = "A steady %lld min = ~%lld min/week = serious distance by month's end. Small steps make a big difference.";
+"Bu seçim, planının önemli bir parçası." = "This choice is an important part of your plan.";

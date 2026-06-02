@@ -204,7 +204,7 @@ struct AuthProviderButton: View {
     }
 
     let logo: AuthProviderLogo
-    let title: String
+    let title: LocalizedStringKey
     let style: Style
     let action: () -> Void
 
