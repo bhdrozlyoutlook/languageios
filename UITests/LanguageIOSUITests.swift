@@ -10,9 +10,13 @@ final class LanguageIOSUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    /// Pin the app to Turkish so assertions are stable regardless of the simulator's
+    /// system language (strings are now localizable).
+    private static let localeArguments = ["--uitest-reset", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+
     private func launchFreshApp() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments += ["--uitest-reset"]
+        app.launchArguments += Self.localeArguments
         app.launch()
         return app
     }
@@ -39,7 +43,7 @@ final class LanguageIOSUITests: XCTestCase {
     func testLaunchPerformance() {
         measure(metrics: [XCTApplicationLaunchMetric()]) {
             let app = XCUIApplication()
-            app.launchArguments += ["--uitest-reset"]
+            app.launchArguments += Self.localeArguments
             app.launch()
         }
     }
