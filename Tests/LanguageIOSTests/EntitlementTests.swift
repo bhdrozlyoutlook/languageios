@@ -310,4 +310,38 @@ final class EntitlementTests: XCTestCase {
         XCTAssertEqual(app.tokenBalance, 0)
         XCTAssertEqual(AppStore(environment: makeTestEnvironment(store: store)).tokenBalance, 0)
     }
+
+    // MARK: Capture gating
+
+    func testCaptureAccessRoutesByAvailability() async {
+        let now = date(2026, 1, 7)
+
+        let freemium = AppStore(environment: makeTestEnvironment())
+        XCTAssertEqual(CaptureAccess.of(freemium, now: now), .freemiumLocked)
+
+        let premium = await premiumStore(InMemoryKeyValueStore(), now: now)
+        guard case .allowed(let remaining, let isPremium, _) = CaptureAccess.of(premium, now: now) else {
+            return XCTFail("premium should be allowed")
+        }
+        XCTAssertTrue(isPremium)
+        XCTAssertEqual(remaining, 10)
+
+        // Freemium holding tokens is allowed too (token = 1 analysis regardless of tier).
+        let store = InMemoryKeyValueStore()
+        let withTokens = AppStore(environment: makeTestEnvironment(
+            store: store,
+            purchaseService: LocalPurchaseService(store: store, logger: NoopLogger(), calendar: cal())
+        ))
+        await withTokens.buyTokens(.ten, now: now)
+        guard case .allowed(_, let stillFreemium, let tokens) = CaptureAccess.of(withTokens, now: now) else {
+            return XCTFail("freemium + tokens should be allowed")
+        }
+        XCTAssertFalse(stillFreemium)
+        XCTAssertEqual(tokens, 10)
+
+        // Premium that spent all 10 free and has no tokens is exhausted.
+        let exhausted = await premiumStore(InMemoryKeyValueStore(), now: now)
+        for _ in 0..<10 { _ = exhausted.consumePhotoQuota(now: now) }
+        XCTAssertEqual(CaptureAccess.of(exhausted, now: now), .premiumExhausted(tokens: 0))
+    }
 }

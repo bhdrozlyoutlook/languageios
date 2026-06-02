@@ -37,6 +37,7 @@ public struct ObjectCaptureView: View {
     @State private var selectedItem: PhotosPickerItem?
     @State private var isCapturePending = false
     @State private var processingTask: Task<Void, Never>?
+    @State private var captureGate: EntitlementFlowView.Screen?
     #if os(iOS)
     @StateObject private var camera = CameraModel()
     #endif
@@ -90,6 +91,9 @@ public struct ObjectCaptureView: View {
         }
         .onDisappear {
             processingTask?.cancel()
+        }
+        .sheet(item: $captureGate) { start in
+            EntitlementFlowView(store: store, start: start, onClose: { captureGate = nil })
         }
     }
 
@@ -196,6 +200,8 @@ public struct ObjectCaptureView: View {
         HStack {
             circleButton(system: "xmark", action: onClose)
                 .accessibilityLabel("Kapat")
+            Spacer()
+            CaptureCounterPill(access: CaptureAccess.of(store), limit: store.photoQuotaLimit)
             Spacer()
             circleButton(system: "square.grid.2x2.fill", action: onShowCollection)
                 .accessibilityLabel("Kelimelerim")
@@ -438,6 +444,12 @@ public struct ObjectCaptureView: View {
     private func process(_ rawData: Data) {
         processingTask?.cancel()
         isCapturePending = false
+        // Spend one analysis right before sending to Gemini; if nothing is available, show
+        // the paywall instead and never call the model.
+        guard let charge = store.consumePhotoQuota() else {
+            captureGate = store.isPremium ? .premiumExhausted : .freemiumGate
+            return
+        }
         withAnimation(.easeInOut(duration: 0.18)) { phase = .processing(rawData) }
 
         processingTask = Task {
@@ -448,8 +460,9 @@ public struct ObjectCaptureView: View {
                 language: language,
                 native: native
             )
-            if Task.isCancelled { return }
+            if Task.isCancelled { store.refundPhotoQuota(charge); return }
             guard let analysis else {
+                store.refundPhotoQuota(charge) // Gemini failed / no object -> don't charge
                 withAnimation(.easeInOut(duration: 0.2)) { phase = .noMatch(rawData) }
                 return
             }

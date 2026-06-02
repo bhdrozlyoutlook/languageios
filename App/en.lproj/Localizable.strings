@@ -263,3 +263,24 @@
 "Etrafındaki objeleri çekerek kelime biriktir." = "Collect words by capturing objects around you.";
 "Obje çek" = "Capture an object";
 "Yeni obje çek" = "Capture new object";
+
+/* ===== Entitlement / paywall ===== */
+"Premium: %lld/%lld hak kaldı" = "Premium: %lld/%lld left";
+"Freemium: %lld hak" = "Freemium: %lld left";
+"%lld jeton" = "%lld tokens";
+"Freemium: 0 hak" = "Freemium: 0 left";
+"Bu dönem bitti" = "Out of allowances";
+"Fotoğrafla öğrenme Premium'da" = "Photo learning is a Premium feature";
+"Premium'da her dönem 10 ücretsiz fotoğraf analizi. Ya da jeton al, hak bitince kullan." = "Premium gives you 10 free photo analyses each period. Or buy tokens to use when you run out.";
+"Premium ol" = "Go Premium";
+"Jeton al" = "Buy tokens";
+"Bu %@ hakların bitti" = "You're out of %@ allowances";
+"haftaki" = "this week's";
+"aydaki" = "this month's";
+"Yeni ücretsiz hakların önümüzdeki dönem yenilenecek. Beklemek istemezsen jeton al." = "Your free allowances renew next period. Buy tokens if you don't want to wait.";
+"Şu an deneme: gerçek ödeme yok" = "Test mode: no real payment yet";
+"Geri" = "Back";
+"Premium (Haftalık)" = "Premium (Weekly)";
+"Premium (Aylık)" = "Premium (Monthly)";
+"10 Jeton" = "10 Tokens";
+"50 Jeton" = "50 Tokens";

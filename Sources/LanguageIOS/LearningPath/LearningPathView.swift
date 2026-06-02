@@ -14,6 +14,7 @@ public struct LearningPathView: View {
     @State private var showProfile = false
     @State private var showObjects = false
     @State private var showCollection = false
+    @State private var entitlementStart: EntitlementFlowView.Screen?
     @State private var showAI = false
     @State private var showsAmbientDecorations = false
 
@@ -36,7 +37,7 @@ public struct LearningPathView: View {
 
     /// True while any sheet / full-screen cover is presented over the map.
     private var isCovered: Bool {
-        activeLesson != nil || showProfile || showObjects || showCollection || showAI || showNoHearts
+        activeLesson != nil || showProfile || showObjects || showCollection || showAI || showNoHearts || entitlementStart != nil
     }
 
     public var body: some View {
@@ -81,8 +82,21 @@ public struct LearningPathView: View {
         .sheet(isPresented: $showProfile) { profileSheet }
         .sheet(isPresented: $showObjects) { objectSheet }
         .sheet(isPresented: $showCollection) { collectionSheet }
+        .sheet(item: $entitlementStart) { start in
+            EntitlementFlowView(store: store, start: start, onClose: { entitlementStart = nil })
+        }
         .sheet(isPresented: $showAI) {
             SentenceAnalysisView(analyzer: env.sentenceAnalyzer, speech: env.speech, language: language, onClose: { showAI = false })
+        }
+    }
+
+    /// Gate the camera at the entry point: a locked freemium user never reaches the
+    /// viewfinder — they get the paywall instead.
+    private func requestCamera() {
+        switch CaptureAccess.of(store) {
+        case .allowed: showObjects = true
+        case .freemiumLocked: entitlementStart = .freemiumGate
+        case .premiumExhausted: entitlementStart = .premiumExhausted
         }
     }
 
@@ -106,7 +120,7 @@ public struct LearningPathView: View {
             speech: env.speech,
             onCapture: {
                 showCollection = false
-                showObjects = true
+                requestCamera()
             },
             onClose: { showCollection = false }
         )
@@ -232,7 +246,7 @@ public struct LearningPathView: View {
                 }
                 .accessibilityLabel("AI cümle analizi")
 
-                Button { showObjects = true } label: {
+                Button { requestCamera() } label: {
                     Image(systemName: "camera.viewfinder")
                         .font(.title2)
                         .foregroundStyle(MapTheme.ink)
