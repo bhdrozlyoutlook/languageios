@@ -15,6 +15,7 @@ public struct LearningPathView: View {
     @State private var showObjects = false
     @State private var showCollection = false
     @State private var showAI = false
+    @State private var showsAmbientDecorations = false
 
     private enum ActiveLesson: Identifiable {
         case stop(LearningStop)
@@ -44,12 +45,18 @@ public struct LearningPathView: View {
         ZStack(alignment: .top) {
             // Pause the per-frame sea decorations while a sheet/cover is up, so they don't
             // compete with the presentation transition (kept the map janky).
-            SeaBackground(paused: isCovered).ignoresSafeArea()
+            SeaBackground(paused: isCovered, showsAmbientDecorations: showsAmbientDecorations)
+                .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header(progress: progress)
                 pathScroll(progress: progress)
             }
+        }
+        .task {
+            await Task.yield()
+            guard !Task.isCancelled else { return }
+            showsAmbientDecorations = true
         }
         .overlay(alignment: .bottom) { practiceButton(progress: progress) }
         .onAppear {
@@ -481,6 +488,7 @@ private struct JourneyTrail: View {
 /// intercepts taps. Each element is procedural so it works before real art is added.
 private struct SeaBackground: View {
     var paused: Bool = false
+    var showsAmbientDecorations: Bool = true
 
     var body: some View {
         GeometryReader { geo in
@@ -502,26 +510,29 @@ private struct SeaBackground: View {
                         .blur(radius: 8)
                 }
 
-                // Clouds drifting across the sky.
-                DriftingCloud(size: 78, opacity: 0.85, amplitude: 26, duration: 19, paused: paused)
-                    .position(x: w * 0.26, y: h * 0.16)
-                DriftingCloud(size: 56, opacity: 0.7, amplitude: 22, duration: 24, paused: paused)
-                    .position(x: w * 0.8, y: h * 0.11)
-                DriftingCloud(size: 46, opacity: 0.6, amplitude: 18, duration: 15, paused: paused)
-                    .position(x: w * 0.62, y: h * 0.23)
+                if showsAmbientDecorations {
+                    // Clouds drifting across the sky.
+                    DriftingCloud(size: 78, opacity: 0.85, amplitude: 26, duration: 19, paused: paused)
+                        .position(x: w * 0.26, y: h * 0.16)
+                    DriftingCloud(size: 56, opacity: 0.7, amplitude: 22, duration: 24, paused: paused)
+                        .position(x: w * 0.8, y: h * 0.11)
+                    DriftingCloud(size: 46, opacity: 0.6, amplitude: 18, duration: 15, paused: paused)
+                        .position(x: w * 0.62, y: h * 0.23)
 
-                // Dolphins leaping out of the water.
-                LeapingDolphin(size: 64, duration: 3.0, delay: 0.0, paused: paused)
-                    .position(x: w * 0.2, y: h * 0.6)
-                LeapingDolphin(size: 46, duration: 3.7, delay: 1.4, paused: paused)
-                    .position(x: w * 0.84, y: h * 0.82)
+                    // Dolphins leaping out of the water.
+                    LeapingDolphin(size: 64, duration: 3.0, delay: 0.0, paused: paused)
+                        .position(x: w * 0.2, y: h * 0.6)
+                    LeapingDolphin(size: 46, duration: 3.7, delay: 1.4, paused: paused)
+                        .position(x: w * 0.84, y: h * 0.82)
 
-                // A sailboat bobbing on the waves.
-                SailboatView(paused: paused)
-                    .frame(width: 66, height: 62)
-                    .position(x: w * 0.73, y: h * 0.47)
+                    // A sailboat bobbing on the waves.
+                    SailboatView(paused: paused)
+                        .frame(width: 66, height: 62)
+                        .position(x: w * 0.73, y: h * 0.47)
+                }
             }
             .allowsHitTesting(false)
+            .animation(.easeIn(duration: 0.2), value: showsAmbientDecorations)
         }
         .accessibilityHidden(true)
     }

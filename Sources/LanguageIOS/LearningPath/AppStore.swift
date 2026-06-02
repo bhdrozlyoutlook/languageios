@@ -22,6 +22,7 @@ public final class AppStore {
 
     private var progressByLanguage: [String: LearningProgress]
     private var gamification: GamificationState
+    private var profile: UserProfile?
 
     public init(environment: AppEnvironment) {
         self.profiles = environment.profileRepository
@@ -38,6 +39,7 @@ public final class AppStore {
         self.targetLanguage = environment.settingsRepository.lastTargetLanguage
         self.progressByLanguage = environment.progressRepository.allProgress()
         self.gamification = environment.gamificationRepository.load()
+        self.profile = environment.profileRepository.loadProfile()
     }
 
     /// Convenience back-compat initializer: builds a live environment over the given
@@ -58,6 +60,7 @@ public final class AppStore {
         hasCompletedOnboarding = true
         targetLanguage = profile.targetLanguage ?? targetLanguage
         let userProfile = UserProfile(from: profile)
+        self.profile = userProfile
         do {
             try profiles.save(userProfile)
             try settings.setOnboardingCompleted(true)
@@ -101,6 +104,7 @@ public final class AppStore {
         targetLanguage = nil
         progressByLanguage = [:]
         gamification = GamificationState()
+        profile = nil
         do {
             try settings.setOnboardingCompleted(false)
             try settings.setLastTargetLanguage(nil)
@@ -199,11 +203,11 @@ public final class AppStore {
 
     public var totalStars: Int { gamification.starsByStop.values.reduce(0, +) }
     public var completedStopCount: Int { progressByLanguage.values.reduce(0) { $0 + $1.completedCount } }
-    public func userProfile() -> UserProfile? { profiles.loadProfile() }
+    public func userProfile() -> UserProfile? { profile }
 
     /// Daily goal progress: lessons/practices done today vs the onboarding target.
     public var activitiesToday: Int { gamification.activitiesToday }
-    public var dailyGoalTarget: Int { profiles.loadProfile()?.dailyGoal?.targetActivities ?? 2 }
+    public var dailyGoalTarget: Int { profile?.dailyGoal?.targetActivities ?? 2 }
     public var dailyGoalReached: Bool { activitiesToday >= dailyGoalTarget }
 
     public func completedStopCount(for language: TargetLanguage) -> Int {
@@ -241,7 +245,7 @@ public final class AppStore {
     public var dailyReminderEnabled: Bool { settings.dailyReminderEnabled }
 
     public func reminderTime() -> ReminderTime {
-        profiles.loadProfile()?.reminderTime ?? .defaultReminder
+        profile?.reminderTime ?? .defaultReminder
     }
 
     public func setDailyReminderEnabled(_ enabled: Bool) {
@@ -259,10 +263,11 @@ public final class AppStore {
     }
 
     public func setReminderTime(_ time: ReminderTime) {
-        var profile = profiles.loadProfile() ?? UserProfile()
-        profile.reminderTime = time
+        var updatedProfile = profile ?? UserProfile()
+        updatedProfile.reminderTime = time
+        profile = updatedProfile
         do {
-            try profiles.save(profile)
+            try profiles.save(updatedProfile)
         } catch {
             handle(error, context: "setReminderTime", fallbackKey: PersistenceSchema.profileKey)
         }
@@ -300,7 +305,7 @@ public final class AppStore {
     }
 
     private func rescheduleStreakReminder() {
-        guard let reminder = profiles.loadProfile()?.reminderTime else { return }
+        guard let reminder = profile?.reminderTime else { return }
         notifications.scheduleDailyReminder(at: reminder, body: streakReminderBody(streak: gamification.streak))
     }
 

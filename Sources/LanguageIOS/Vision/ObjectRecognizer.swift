@@ -20,6 +20,28 @@ public protocol ObjectRecognizing: AnyObject {
     func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition?
 }
 
+/// Defers recognizer construction until the user actually opens camera/object capture.
+/// This keeps launch from paying Vision/Gemini setup costs before the first screen.
+public actor LazyObjectRecognizer: ObjectRecognizing {
+    private let makeRecognizer: @Sendable () -> ObjectRecognizing
+    private var cached: ObjectRecognizing?
+
+    public init(_ makeRecognizer: @escaping @Sendable () -> ObjectRecognizing) {
+        self.makeRecognizer = makeRecognizer
+    }
+
+    public func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition? {
+        let recognizer: ObjectRecognizing
+        if let cached {
+            recognizer = cached
+        } else {
+            recognizer = makeRecognizer()
+            cached = recognizer
+        }
+        return await recognizer.recognize(imageData, target: target, native: native)
+    }
+}
+
 /// On-device recognizer: Apple's Vision classifier + the built-in English→Turkish
 /// vocabulary. Target-language words are limited to English (the dictionary's language),
 /// so it doubles as the offline fallback for `GeminiObjectRecognizer`.
@@ -34,6 +56,29 @@ public final class OnDeviceObjectRecognizer: ObjectRecognizing {
         let labels = await classifier.classify(imageData)
         guard let best = ObjectVocabulary.bestMatch(in: labels) else { return nil }
         return ObjectRecognition(word: best.english, native: best.turkish, english: best.english)
+    }
+}
+
+/// Keeps common English object capture instant by trying the on-device classifier before
+/// the network recognizer. Non-English targets still prefer the remote recognizer so the
+/// displayed word can be in the selected learning language.
+public final class FastObjectRecognizer: ObjectRecognizing {
+    private let local: ObjectRecognizing
+    private let remote: ObjectRecognizing?
+
+    public init(local: ObjectRecognizing = OnDeviceObjectRecognizer(), remote: ObjectRecognizing?) {
+        self.local = local
+        self.remote = remote
+    }
+
+    public func recognize(_ imageData: Data, target: TargetLanguage, native: TargetLanguage) async -> ObjectRecognition? {
+        if target.usesEnglishObjectVocabulary, let localResult = await local.recognize(imageData, target: target, native: native) {
+            return localResult
+        }
+        if let remoteResult = await remote?.recognize(imageData, target: target, native: native) {
+            return remoteResult
+        }
+        return await local.recognize(imageData, target: target, native: native)
     }
 }
 
@@ -113,5 +158,9 @@ extension TargetLanguage {
         case .spanish: "Spanish"
         case .french: "French"
         }
+    }
+
+    fileprivate var usesEnglishObjectVocabulary: Bool {
+        self == .englishUS || self == .englishUK
     }
 }

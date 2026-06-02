@@ -5,7 +5,6 @@ import SwiftUI
 /// onboarding vs. learning-path home, and surfaces persistence errors.
 public struct RootView: View {
     @State private var store: AppStore
-    @State private var showSplash = true
     private let environment: AppEnvironment
 
     /// Defaults to `.preview()` so `#Preview` and tests can use `RootView()`.
@@ -15,19 +14,7 @@ public struct RootView: View {
     }
 
     public var body: some View {
-        ZStack {
-            content
-            if showSplash {
-                SplashView()
-                    .transition(.opacity)
-                    .zIndex(1)
-            }
-        }
-        .task {
-            // Branded splash that masks first-frame setup, then fades to content.
-            try? await Task.sleep(nanoseconds: 1_200_000_000)
-            withAnimation(.easeOut(duration: 0.5)) { showSplash = false }
-        }
+        content
         .environment(\.appEnvironment, environment)
         .onAppear { environment.crashReporter.recordBreadcrumb("app launched", category: .app) }
         .alert(

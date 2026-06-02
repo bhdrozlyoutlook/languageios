@@ -782,8 +782,8 @@ private struct PersonalPlanSummaryView: View {
     private var heroHeader: some View {
         SequentialTypewriterText(
             phrases: heroPhrases,
-            typingSpeed: 0.04,
-            holdDuration: 0.6,
+            typingSpeed: 0.01,
+            holdDuration: 0.08,
             settleOnLast: true,
             onComplete: {
                 withAnimation(.easeOut(duration: 0.24)) {
@@ -924,14 +924,14 @@ private struct PersonalPlanSummaryView: View {
                 withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) {
                     revealedChipCount = i + 1
                 }
-                try? await Task.sleep(for: .milliseconds(180))
+                try? await Task.sleep(for: .milliseconds(40))
             }
-            try? await Task.sleep(for: .milliseconds(220))
+            try? await Task.sleep(for: .milliseconds(40))
             for i in 0..<profile.planCards.count {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
                     revealedCount = i + 1
                 }
-                try? await Task.sleep(for: .milliseconds(280))
+                try? await Task.sleep(for: .milliseconds(55))
             }
         }
     }
@@ -962,7 +962,7 @@ private struct PlanCardRow: View {
 
                 OneShotTypewriterText(
                     text: commentary,
-                    charDelay: 0.015,
+                    charDelay: 0.003,
                     start: startTyping
                 )
                 .font(.caption)

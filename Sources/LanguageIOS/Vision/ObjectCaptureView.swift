@@ -35,6 +35,8 @@ public struct ObjectCaptureView: View {
 
     @State private var phase: Phase = .capture
     @State private var selectedItem: PhotosPickerItem?
+    @State private var isCapturePending = false
+    @State private var processingTask: Task<Void, Never>?
     #if os(iOS)
     @StateObject private var camera = CameraModel()
     #endif
@@ -74,11 +76,20 @@ public struct ObjectCaptureView: View {
         }
         .onChange(of: selectedItem) { _, item in
             guard let item else { return }
+            isCapturePending = true
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self) {
-                    await process(data)
+                let data = try? await item.loadTransferable(type: Data.self)
+                await MainActor.run {
+                    if let data {
+                        process(data)
+                    } else {
+                        isCapturePending = false
+                    }
                 }
             }
+        }
+        .onDisappear {
+            processingTask?.cancel()
         }
     }
 
@@ -88,6 +99,9 @@ public struct ObjectCaptureView: View {
         ZStack {
             cameraSurface
             reticleOverlay
+            if isCapturePending {
+                capturePendingOverlay
+            }
             VStack {
                 captureTopBar
                 Spacer()
@@ -159,6 +173,25 @@ public struct ObjectCaptureView: View {
             .padding(.bottom, 22)
     }
 
+    private var capturePendingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.2).ignoresSafeArea()
+            VStack(spacing: 10) {
+                ProgressView()
+                    .tint(.white)
+                    .controlSize(.large)
+                Label("Fotoğraf alınıyor…", systemImage: "camera.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
+            .background(Capsule().fill(.black.opacity(0.5)))
+        }
+        .allowsHitTesting(false)
+        .transition(.opacity)
+    }
+
     private var captureTopBar: some View {
         HStack {
             circleButton(system: "xmark", action: onClose)
@@ -198,7 +231,16 @@ public struct ObjectCaptureView: View {
     private var shutterButton: some View {
         Button {
             #if os(iOS)
-            camera.capturePhoto { data in Task { await process(data) } }
+            let didStart = camera.capturePhoto { data in
+                if let data {
+                    process(data)
+                } else {
+                    isCapturePending = false
+                }
+            }
+            if didStart {
+                withAnimation(.easeOut(duration: 0.12)) { isCapturePending = true }
+            }
             #endif
         } label: {
             ZStack {
@@ -215,8 +257,8 @@ public struct ObjectCaptureView: View {
         }
         .accessibilityLabel("Çek")
         #if os(iOS)
-        .disabled(camera.status != .ready)
-        .opacity(camera.status == .ready ? 1 : 0.4)
+        .disabled(camera.status != .ready || isCapturePending || camera.isCapturing)
+        .opacity(camera.status == .ready && !isCapturePending && !camera.isCapturing ? 1 : 0.4)
         #else
         .disabled(true)
         .opacity(0.4)
@@ -392,42 +434,105 @@ public struct ObjectCaptureView: View {
 
     // MARK: Actions
 
-    private func process(_ rawData: Data) async {
-        // Upright + downscale first: fixes the 90°-rotated cutout and keeps scanning fast
-        // (no multi-megapixel upload to Gemini / mask on a huge image).
-        let data = ImageNormalizer.prepared(rawData)
-        withAnimation(.easeInOut(duration: 0.25)) { phase = .processing(data) }
+    @MainActor
+    private func process(_ rawData: Data) {
+        processingTask?.cancel()
+        isCapturePending = false
+        withAnimation(.easeInOut(duration: 0.18)) { phase = .processing(rawData) }
 
-        // Lift the subject first, then recognize the background-removed cutout when we got
-        // one: Gemini then sees only the framed object, not the surrounding scene (which
-        // let a background/side object win). Fall back to the full frame if no cutout.
-        let cutout = await extractor.extractSubject(from: data)
-        let recognitionInput = cutout.map(ImageNormalizer.onWhite) ?? data
-        let recognition = await recognizer.recognize(recognitionInput, target: language, native: native)
-        if let recognition {
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
-                phase = .result(CaptureResult(
-                    display: cutout ?? data,
-                    word: recognition.word,
-                    native: recognition.native,
-                    cutout: cutout
-                ))
+        processingTask = Task {
+            let analysis = await ObjectCaptureAnalyzer.recognizeFirst(
+                rawData: rawData,
+                recognizer: recognizer,
+                extractor: extractor,
+                language: language,
+                native: native
+            )
+            if Task.isCancelled { return }
+            guard let analysis else {
+                withAnimation(.easeInOut(duration: 0.2)) { phase = .noMatch(rawData) }
+                return
             }
-            speech.speak(recognition.word, language: language)
-        } else {
-            phase = .noMatch(data)
+
+            let initialResult = CaptureResult(
+                display: analysis.preparedData,
+                word: analysis.recognition.word,
+                native: analysis.recognition.native,
+                cutout: nil
+            )
+            withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
+                phase = .result(initialResult)
+            }
+            speech.speak(analysis.recognition.word, language: language)
+
+            guard let cutout = await analysis.cutout.value, !Task.isCancelled else { return }
+            let stickerResult = CaptureResult(
+                display: cutout,
+                word: analysis.recognition.word,
+                native: analysis.recognition.native,
+                cutout: cutout
+            )
+            if case .result(let current) = phase,
+               current.word == initialResult.word,
+               current.native == initialResult.native,
+               current.cutout == nil {
+                withAnimation(.easeInOut(duration: 0.18)) {
+                    phase = .result(stickerResult)
+                }
+            }
         }
     }
 
     private func confirm(_ result: CaptureResult) {
+        processingTask?.cancel()
         store.captureObject(english: result.word, native: result.native, image: result.cutout ?? result.display)
         selectedItem = nil
         onShowCollection()
     }
 
     private func retry() {
+        processingTask?.cancel()
+        isCapturePending = false
         selectedItem = nil
         phase = .capture
+    }
+}
+
+struct ObjectCaptureAnalysis {
+    let preparedData: Data
+    let recognition: ObjectRecognition
+    let cutout: Task<Data?, Never>
+}
+
+enum ObjectCaptureAnalyzer {
+    static func recognizeFirst(
+        rawData: Data,
+        recognizer: ObjectRecognizing,
+        extractor: SubjectExtracting,
+        language: TargetLanguage,
+        native: TargetLanguage
+    ) async -> ObjectCaptureAnalysis? {
+        let preparedData = await Task.detached(priority: .userInitiated) {
+            ImageNormalizer.prepared(rawData)
+        }.value
+        guard !Task.isCancelled else { return nil }
+
+        let cutout = Task(priority: .userInitiated) {
+            await extractor.extractSubject(from: preparedData)
+        }
+
+        if let recognition = await recognizer.recognize(preparedData, target: language, native: native) {
+            return ObjectCaptureAnalysis(preparedData: preparedData, recognition: recognition, cutout: cutout)
+        }
+
+        guard !Task.isCancelled, let extracted = await cutout.value else { return nil }
+        let cutoutRecognitionInput = await Task.detached(priority: .userInitiated) {
+            ImageNormalizer.onWhite(extracted)
+        }.value
+        if let recognition = await recognizer.recognize(cutoutRecognitionInput, target: language, native: native) {
+            return ObjectCaptureAnalysis(preparedData: extracted, recognition: recognition, cutout: Task { extracted })
+        }
+        return nil
     }
 }
 

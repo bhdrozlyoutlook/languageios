@@ -30,7 +30,7 @@ public struct AppEnvironment {
         notifications: NotificationScheduling,
         speech: SpeechService,
         captureRepository: CaptureRepository,
-        objectRecognizer: ObjectRecognizing = OnDeviceObjectRecognizer(),
+        objectRecognizer: ObjectRecognizing = LazyObjectRecognizer { OnDeviceObjectRecognizer() },
         sentenceAnalyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer()
     ) {
         self.analytics = analytics
@@ -100,8 +100,12 @@ public extension AppEnvironment {
     /// Uses Gemini when an API key is configured (Secrets.plist / env), otherwise the
     /// on-device recognizer. Gemini itself falls back to on-device on network errors.
     private static func makeObjectRecognizer() -> ObjectRecognizing {
-        let key = Secrets.geminiAPIKey
-        return key.isEmpty ? OnDeviceObjectRecognizer() : GeminiObjectRecognizer(apiKey: key)
+        LazyObjectRecognizer {
+            let key = Secrets.geminiAPIKey
+            let local = OnDeviceObjectRecognizer()
+            guard !key.isEmpty else { return local }
+            return FastObjectRecognizer(local: local, remote: GeminiObjectRecognizer(apiKey: key, fallback: nil))
+        }
     }
 
     private static func makeSentenceAnalyzer() -> SentenceAnalyzing {

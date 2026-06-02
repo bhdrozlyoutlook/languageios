@@ -1,7 +1,7 @@
 import SwiftUI
 
 #if canImport(AVFoundation) && canImport(UIKit) && os(iOS)
-import AVFoundation
+@preconcurrency import AVFoundation
 import UIKit
 
 /// Drives a live capture session for the object-capture viewfinder. The session only
@@ -18,11 +18,12 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
     }
 
     @Published private(set) var status: Status = .idle
+    @Published private(set) var isCapturing = false
 
     let session = AVCaptureSession()
     private let output = AVCapturePhotoOutput()
     private let queue = DispatchQueue(label: "language-ios.camera")
-    private var onCapture: ((Data) -> Void)?
+    private var onCapture: ((Data?) -> Void)?
     private var configured = false
 
     /// Requests permission and starts the session, or reports why it can't.
@@ -49,11 +50,15 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
     }
 
     /// Triggers a still capture; the PNG/JPEG data arrives via `onCapture`.
-    func capturePhoto(_ onCapture: @escaping (Data) -> Void) {
-        guard status == .ready else { return }
+    @discardableResult
+    func capturePhoto(_ onCapture: @escaping (Data?) -> Void) -> Bool {
+        guard status == .ready, !isCapturing else { return false }
+        isCapturing = true
         self.onCapture = onCapture
         let settings = AVCapturePhotoSettings()
+        settings.photoQualityPrioritization = .speed
         output.capturePhoto(with: settings, delegate: self)
+        return true
     }
 
     private func configureAndRun() {
@@ -75,7 +80,10 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
             session.beginConfiguration()
             session.sessionPreset = .photo
             if session.canAddInput(input) { session.addInput(input) }
-            if session.canAddOutput(output) { session.addOutput(output) }
+            if session.canAddOutput(output) {
+                session.addOutput(output)
+                output.maxPhotoQualityPrioritization = .speed
+            }
             session.commitConfiguration()
             session.startRunning()
             Task { @MainActor in
@@ -92,7 +100,8 @@ final class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelega
     ) {
         let data = photo.fileDataRepresentation()
         Task { @MainActor in
-            if let data { self.onCapture?(data) }
+            self.isCapturing = false
+            self.onCapture?(data)
             self.onCapture = nil
         }
     }
