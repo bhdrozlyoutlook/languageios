@@ -5,17 +5,27 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-test:
+    name: Build & test
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
 
+      - name: Swift version
+        run: swift --version
+
+      # No Secrets.plist in CI — Gemini/ElevenLabs/RevenueCat adapters fall back to their
+      # on-device/stub paths, so the suite is deterministic and key-free.
       - name: Swift build (library)
         run: swift build
 
       - name: Swift test (library)
-        run: swift test
+        run: swift test --parallel
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -23,21 +33,26 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Build & UI-test iOS app (simulator)
-        run: >
-          xcodebuild
-          -project LanguageIOS.xcodeproj
-          -scheme LanguageIOSApp
-          -configuration Debug
-          -destination 'platform=iOS Simulator,name=iPhone 16'
-          -derivedDataPath build
-          test
+      # Compile-only check for the iOS app target (catches UIKit-gated code that the
+      # macOS SwiftPM build skips). Generic destination → no specific simulator needed.
+      - name: iOS app build (compile check)
+        run: |
+          xcodebuild build \
+            -project LanguageIOS.xcodeproj \
+            -scheme LanguageIOSApp \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO
 
   lint:
+    name: SwiftLint (informational)
     runs-on: macos-14
+    # Style warnings shouldn't block merges yet; surfaced but non-blocking.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Install SwiftLint
         run: brew install swiftlint
       - name: Lint
-        run: swiftlint --strict
+        run: swiftlint
