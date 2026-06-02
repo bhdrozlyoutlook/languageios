@@ -29,16 +29,21 @@ targets:
     dependencies:
       - package: FlagKit
         product: FlagKit
+    info:
+      path: Support/Info.plist
+      properties:
+        CFBundleDisplayName: LanguageIOS
+        # Explicit launch screen (the INFOPLIST_KEY_UILaunchScreen_* settings produced an
+        # empty UILaunchScreen → blank white). Branded: Aa logo over the cream background.
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+          UIImageName: LaunchLogo
+        NSCameraUsageDescription: "Objeleri çekip kelimelerini öğrenmek için kamera kullanılır."
+        NSPhotoLibraryUsageDescription: "Fotoğraflardan obje tanıyıp kelime öğrenmek için galeri kullanılır."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bhdrozly.languageios
         PRODUCT_NAME: LanguageIOS
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: LanguageIOS
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
-        INFOPLIST_KEY_NSCameraUsageDescription: "Objeleri çekip kelimelerini öğrenmek için kamera kullanılır."
-        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Fotoğraflardan obje tanıyıp kelime öğrenmek için galeri kullanılır."
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO

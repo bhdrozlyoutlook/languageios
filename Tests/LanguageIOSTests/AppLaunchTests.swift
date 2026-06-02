@@ -10,12 +10,11 @@ final class AppLaunchTests: XCTestCase {
         XCTAssertFalse(rootViewSource.contains("LaunchSplashPolicy"))
     }
 
-    func testProjectConfigUsesPlainAppColoredLaunchScreen() throws {
+    func testProjectConfigUsesBrandedLaunchScreen() throws {
         let projectSpec = try sourceText(at: "project.yml")
 
-        XCTAssertFalse(projectSpec.contains("INFOPLIST_KEY_UILaunchScreen_ImageName"))
-        XCTAssertFalse(projectSpec.contains("LaunchLogo"))
-        XCTAssertTrue(projectSpec.contains("INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground"))
+        XCTAssertTrue(projectSpec.contains("UIImageName: LaunchLogo"))
+        XCTAssertTrue(projectSpec.contains("UIColorName: LaunchBackground"))
     }
 
     func testEnvironmentDoesNotEagerlyBuildCameraRecognizerOnLaunch() throws {
