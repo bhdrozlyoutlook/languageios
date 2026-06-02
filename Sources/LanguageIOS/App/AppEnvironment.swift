@@ -114,7 +114,14 @@ public extension AppEnvironment {
     /// Local purchases now (no payment); flips to `StoreKit2PurchaseService` behind a build
     /// flag once App Store Connect product IDs exist — the only line that changes.
     private static func makePurchaseService(store: KeyValueStore, logger: AppLogging) -> PurchaseService {
-        LocalPurchaseService(store: store, logger: logger, calendar: Calendar(identifier: .iso8601))
+        let calendar = Calendar(identifier: .iso8601)
+        #if canImport(RevenueCat)
+        let revenueCatKey = Secrets.revenueCatAPIKey
+        if !revenueCatKey.isEmpty {
+            return RevenueCatPurchaseService(apiKey: revenueCatKey, calendar: calendar)
+        }
+        #endif
+        return LocalPurchaseService(store: store, logger: logger, calendar: calendar)
     }
 
     /// Uses Gemini for object identification. Missing keys or network failures return no
