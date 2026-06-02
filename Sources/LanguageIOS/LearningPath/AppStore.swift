@@ -18,6 +18,7 @@ public final class AppStore {
     @ObservationIgnored private let crashReporter: CrashReporter
     @ObservationIgnored private let gamificationRepo: GamificationRepository
     @ObservationIgnored private let notifications: NotificationScheduling
+    @ObservationIgnored private let captureRepo: CaptureRepository
 
     private var progressByLanguage: [String: LearningProgress]
     private var gamification: GamificationState
@@ -31,6 +32,7 @@ public final class AppStore {
         self.crashReporter = environment.crashReporter
         self.gamificationRepo = environment.gamificationRepository
         self.notifications = environment.notifications
+        self.captureRepo = environment.captureRepository
 
         self.hasCompletedOnboarding = environment.settingsRepository.hasCompletedOnboarding
         self.targetLanguage = environment.settingsRepository.lastTargetLanguage
@@ -137,6 +139,37 @@ public final class AppStore {
         gamification.capturedWords.insert(english)
         persistGamification()
         analytics.track(AnalyticsEvent(name: "object_word_captured", params: ["word": english]))
+    }
+
+    /// The captured-word collection, newest first (grouping by day happens in the view).
+    public func capturedObjects() -> [CapturedObject] { captureRepo.all() }
+
+    /// Cutout PNG for a captured object, if one was stored.
+    public func captureImage(forID id: String) -> Data? { captureRepo.image(forID: id) }
+
+    /// Persist a freshly captured object (cutout sticker + word) into the collection,
+    /// and credit it toward the captured-word count/streak via the existing path.
+    @discardableResult
+    public func captureObject(
+        english: String,
+        native: String,
+        image: Data?,
+        now: Date = Date()
+    ) -> CapturedObject {
+        let object = CapturedObject(
+            id: UUID().uuidString,
+            english: english,
+            native: native,
+            language: targetLanguage ?? .englishUS,
+            capturedAt: now
+        )
+        captureRepo.add(object, image: image)
+        captureWord(english)
+        return object
+    }
+
+    public func removeCapturedObject(id: String) {
+        captureRepo.remove(id: id)
     }
 
     // MARK: Account (local, offline-first)

@@ -243,3 +243,23 @@
 "Önceki adıma dön" = "Go to previous step";
 "Onboarding'i başa al" = "Restart onboarding";
 "Kapat" = "Close";
+
+/* ===== Camera object capture ===== */
+"Objeyi çerçevenin içine al" = "Place the object in the frame";
+"Bu cihazda canlı kamera yok" = "No live camera on this device";
+"Galeriden bir fotoğraf seçerek deneyebilirsin." = "Try selecting a photo from your library.";
+"Obje tanınıyor…" = "Recognizing object…";
+"Beklediğin bu değil mi? Tekrar dene." = "Not what you expected? Try again.";
+"Bunu tanıyamadım" = "I couldn't recognize this";
+"Objeyi çerçeveye ortala ve tekrar dene." = "Center the object in the frame and try again.";
+"Tekrar dene" = "Try again";
+"Onayla" = "Confirm";
+"İptal" = "Cancel";
+"Çek" = "Capture";
+"Galeriden seç" = "Choose from library";
+"Kelimelerim" = "My words";
+"· %lld kelime" = "· %lld words";
+"Henüz kelime yok" = "No words yet";
+"Etrafındaki objeleri çekerek kelime biriktir." = "Collect words by capturing objects around you.";
+"Obje çek" = "Capture an object";
+"Yeni obje çek" = "Capture new object";

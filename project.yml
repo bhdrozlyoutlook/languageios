@@ -37,6 +37,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: LanguageIOS
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
+        INFOPLIST_KEY_NSCameraUsageDescription: "Objeleri çekip kelimelerini öğrenmek için kamera kullanılır."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Fotoğraflardan obje tanıyıp kelime öğrenmek için galeri kullanılır."
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO

@@ -41,4 +41,19 @@ final class ObjectLabelTests: XCTestCase {
         let restored = AppStore(environment: makeTestEnvironment(store: store))
         XCTAssertEqual(restored.capturedWordCount, 2)
     }
+
+    func testCaptureObjectPersistsToCollectionAndCountsTheWord() {
+        let store = InMemoryKeyValueStore()
+        let env = makeTestEnvironment(store: store)
+        let app = AppStore(environment: env)
+
+        app.captureObject(english: "Cup", native: "fincan", image: Data([0xA]))
+
+        XCTAssertEqual(app.capturedWordCount, 1)
+        let collection = app.capturedObjects()
+        XCTAssertEqual(collection.count, 1)
+        XCTAssertEqual(collection.first?.english, "Cup")
+        XCTAssertEqual(collection.first?.native, "fincan")
+        XCTAssertEqual(app.captureImage(forID: collection.first!.id), Data([0xA]))
+    }
 }

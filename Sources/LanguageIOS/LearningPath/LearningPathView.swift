@@ -13,6 +13,7 @@ public struct LearningPathView: View {
     @State private var showNoHearts = false
     @State private var showProfile = false
     @State private var showObjects = false
+    @State private var showCollection = false
     @State private var showAI = false
 
     private enum ActiveLesson: Identifiable {
@@ -65,16 +66,34 @@ public struct LearningPathView: View {
         }
         .sheet(isPresented: $showProfile) { profileSheet }
         .sheet(isPresented: $showObjects) { objectSheet }
+        .sheet(isPresented: $showCollection) { collectionSheet }
         .sheet(isPresented: $showAI) {
             SentenceAnalysisView(speech: env.speech, language: language, onClose: { showAI = false })
         }
     }
 
     private var objectSheet: some View {
-        ObjectLabelView(
+        ObjectCaptureView(
+            store: store,
             speech: env.speech,
-            onCapture: { english, _ in store.captureWord(english) },
+            language: language,
+            onShowCollection: {
+                showObjects = false
+                showCollection = true
+            },
             onClose: { showObjects = false }
+        )
+    }
+
+    private var collectionSheet: some View {
+        WordCollectionView(
+            store: store,
+            speech: env.speech,
+            onCapture: {
+                showCollection = false
+                showObjects = true
+            },
+            onClose: { showCollection = false }
         )
     }
 

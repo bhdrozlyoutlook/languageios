@@ -52,7 +52,8 @@ func makeTestEnvironment(
         settingsRepository: UserDefaultsSettingsRepository(store: store, logger: logger),
         gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
         notifications: notifications,
-        speech: NoopSpeechService()
+        speech: NoopSpeechService(),
+        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
     )
 }
 
@@ -69,6 +70,7 @@ func makeFailingProfileEnvironment() -> AppEnvironment {
         settingsRepository: UserDefaultsSettingsRepository(store: store, logger: logger),
         gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
         notifications: NoopNotificationScheduler(),
-        speech: NoopSpeechService()
+        speech: NoopSpeechService(),
+        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
     )
 }

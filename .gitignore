@@ -19,3 +19,6 @@ LanguageIOS.xcodeproj/
 
 # macOS
 .DS_Store
+
+# Claude scratch
+.claude/

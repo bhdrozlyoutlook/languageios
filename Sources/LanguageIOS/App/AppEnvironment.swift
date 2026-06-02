@@ -14,6 +14,7 @@ public struct AppEnvironment {
     public let gamificationRepository: GamificationRepository
     public let notifications: NotificationScheduling
     public let speech: SpeechService
+    public let captureRepository: CaptureRepository
 
     public init(
         analytics: AnalyticsService,
@@ -25,7 +26,8 @@ public struct AppEnvironment {
         settingsRepository: SettingsRepository,
         gamificationRepository: GamificationRepository,
         notifications: NotificationScheduling,
-        speech: SpeechService
+        speech: SpeechService,
+        captureRepository: CaptureRepository
     ) {
         self.analytics = analytics
         self.logger = logger
@@ -37,6 +39,7 @@ public struct AppEnvironment {
         self.gamificationRepository = gamificationRepository
         self.notifications = notifications
         self.speech = speech
+        self.captureRepository = captureRepository
     }
 }
 
@@ -77,7 +80,12 @@ public extension AppEnvironment {
             settingsRepository: UserDefaultsSettingsRepository(store: store, logger: logger),
             gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
             notifications: SystemNotificationScheduler(),
-            speech: speech
+            speech: speech,
+            captureRepository: DefaultCaptureRepository(
+                store: store,
+                blobs: FileImageBlobStore() ?? InMemoryImageBlobStore(),
+                logger: logger
+            )
         )
     }
 
@@ -95,7 +103,8 @@ public extension AppEnvironment {
             settingsRepository: UserDefaultsSettingsRepository(store: store, logger: logger),
             gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
             notifications: NoopNotificationScheduler(),
-            speech: NoopSpeechService()
+            speech: NoopSpeechService(),
+            captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
         )
     }
 }
