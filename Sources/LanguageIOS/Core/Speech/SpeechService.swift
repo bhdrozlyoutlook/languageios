@@ -18,7 +18,9 @@ public final class NoopSpeechService: SpeechService {
 
 #if canImport(AVFAudio)
 public final class AVSpeechService: SpeechService {
-    private let synthesizer = AVSpeechSynthesizer()
+    // Lazy: constructing an AVSpeechSynthesizer spins up the speech/audio subsystem, which
+    // is slow on a cold launch — defer it to the first spoken word.
+    private lazy var synthesizer = AVSpeechSynthesizer()
 
     public init() {}
 

@@ -71,9 +71,7 @@ public extension AppEnvironment {
         #endif
 
         let crashReporter = BreadcrumbCrashReporter(store: store, logger: logger)
-        #if canImport(MetricKit) && os(iOS)
-        MetricKitReporter.start(logger: logger, crashReporter: crashReporter)
-        #endif
+        // MetricKit is started off the launch critical path — see startDeferredServices().
 
         let speech: SpeechService
         #if canImport(AVFAudio)
@@ -103,6 +101,14 @@ public extension AppEnvironment {
             objectRecognizer: makeObjectRecognizer(),
             sentenceAnalyzer: makeSentenceAnalyzer()
         )
+    }
+
+    /// Background services that don't need to block the first frame. Call once after launch
+    /// (from RootView's `.task`).
+    func startDeferredServices() {
+        #if canImport(MetricKit) && os(iOS)
+        MetricKitReporter.start(logger: logger, crashReporter: crashReporter)
+        #endif
     }
 
     /// Local purchases now (no payment); flips to `StoreKit2PurchaseService` behind a build
