@@ -22,3 +22,6 @@ LanguageIOS.xcodeproj/
 
 # Claude scratch
 .claude/
+
+# API keys — never commit (use App/Secrets.plist locally)
+App/Secrets.plist

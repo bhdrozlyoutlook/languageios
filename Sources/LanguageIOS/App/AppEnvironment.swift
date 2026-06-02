@@ -15,6 +15,8 @@ public struct AppEnvironment {
     public let notifications: NotificationScheduling
     public let speech: SpeechService
     public let captureRepository: CaptureRepository
+    public let objectRecognizer: ObjectRecognizing
+    public let sentenceAnalyzer: SentenceAnalyzing
 
     public init(
         analytics: AnalyticsService,
@@ -27,7 +29,9 @@ public struct AppEnvironment {
         gamificationRepository: GamificationRepository,
         notifications: NotificationScheduling,
         speech: SpeechService,
-        captureRepository: CaptureRepository
+        captureRepository: CaptureRepository,
+        objectRecognizer: ObjectRecognizing = OnDeviceObjectRecognizer(),
+        sentenceAnalyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer()
     ) {
         self.analytics = analytics
         self.logger = logger
@@ -40,6 +44,8 @@ public struct AppEnvironment {
         self.notifications = notifications
         self.speech = speech
         self.captureRepository = captureRepository
+        self.objectRecognizer = objectRecognizer
+        self.sentenceAnalyzer = sentenceAnalyzer
     }
 }
 
@@ -85,8 +91,22 @@ public extension AppEnvironment {
                 store: store,
                 blobs: FileImageBlobStore() ?? InMemoryImageBlobStore(),
                 logger: logger
-            )
+            ),
+            objectRecognizer: makeObjectRecognizer(),
+            sentenceAnalyzer: makeSentenceAnalyzer()
         )
+    }
+
+    /// Uses Gemini when an API key is configured (Secrets.plist / env), otherwise the
+    /// on-device recognizer. Gemini itself falls back to on-device on network errors.
+    private static func makeObjectRecognizer() -> ObjectRecognizing {
+        let key = Secrets.geminiAPIKey
+        return key.isEmpty ? OnDeviceObjectRecognizer() : GeminiObjectRecognizer(apiKey: key)
+    }
+
+    private static func makeSentenceAnalyzer() -> SentenceAnalyzing {
+        let key = Secrets.geminiAPIKey
+        return key.isEmpty ? HeuristicSentenceAnalyzer() : GeminiSentenceAnalyzer(apiKey: key)
     }
 
     /// All no-op / in-memory — for `#Preview` and tests that don't assert side effects.

@@ -103,7 +103,7 @@ public struct WordCollectionView: View {
 
     private func tile(_ item: CapturedObject) -> some View {
         Button {
-            speech.speak(item.english, language: .englishUS)
+            speech.speak(item.english, language: item.language)
         } label: {
             VStack(spacing: 8) {
                 CutoutSticker(imageData: store.captureImage(forID: item.id), cornerRadius: 18)

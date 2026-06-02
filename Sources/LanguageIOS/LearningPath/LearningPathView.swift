@@ -68,13 +68,14 @@ public struct LearningPathView: View {
         .sheet(isPresented: $showObjects) { objectSheet }
         .sheet(isPresented: $showCollection) { collectionSheet }
         .sheet(isPresented: $showAI) {
-            SentenceAnalysisView(speech: env.speech, language: language, onClose: { showAI = false })
+            SentenceAnalysisView(analyzer: env.sentenceAnalyzer, speech: env.speech, language: language, onClose: { showAI = false })
         }
     }
 
     private var objectSheet: some View {
         ObjectCaptureView(
             store: store,
+            recognizer: env.objectRecognizer,
             speech: env.speech,
             language: language,
             onShowCollection: {

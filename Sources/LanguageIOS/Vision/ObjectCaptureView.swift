@@ -11,10 +11,11 @@ import UIKit
 /// macOS fall back to the photo library.
 public struct ObjectCaptureView: View {
     private let store: AppStore
-    private let classifier: ImageClassifying
+    private let recognizer: ObjectRecognizing
     private let extractor: SubjectExtracting
     private let speech: SpeechService
     private let language: TargetLanguage
+    private let native: TargetLanguage
     private let onShowCollection: () -> Void
     private let onClose: () -> Void
 
@@ -27,8 +28,8 @@ public struct ObjectCaptureView: View {
 
     private struct CaptureResult: Equatable {
         let display: Data   // cutout if available, else the original photo
-        let english: String
-        let native: String
+        let word: String    // object name in the target language
+        let native: String  // Turkish translation
         let cutout: Data?
     }
 
@@ -40,18 +41,20 @@ public struct ObjectCaptureView: View {
 
     public init(
         store: AppStore,
-        classifier: ImageClassifying = VisionImageClassifier(),
+        recognizer: ObjectRecognizing = OnDeviceObjectRecognizer(),
         extractor: SubjectExtracting = VisionSubjectExtractor(),
         speech: SpeechService,
         language: TargetLanguage,
+        native: TargetLanguage = .turkish,
         onShowCollection: @escaping () -> Void,
         onClose: @escaping () -> Void
     ) {
         self.store = store
-        self.classifier = classifier
+        self.recognizer = recognizer
         self.extractor = extractor
         self.speech = speech
         self.language = language
+        self.native = native
         self.onShowCollection = onShowCollection
         self.onClose = onClose
     }
@@ -256,10 +259,10 @@ public struct ObjectCaptureView: View {
                     .padding(.horizontal, 30)
 
                 HStack(spacing: 12) {
-                    Text(result.english)
+                    Text(result.word)
                         .font(.system(size: 34, weight: .black, design: .rounded))
                         .foregroundStyle(OnboardingTheme.ink)
-                    Button { speech.speak(result.english, language: .englishUS) } label: {
+                    Button { speech.speak(result.word, language: language) } label: {
                         Image(systemName: "speaker.wave.2.fill")
                             .font(.title2)
                             .foregroundStyle(OnboardingTheme.teal)
@@ -378,22 +381,21 @@ public struct ObjectCaptureView: View {
     private func process(_ data: Data) async {
         phase = .processing
         let cutout = await extractor.extractSubject(from: data)
-        let labels = await classifier.classify(data)
-        if let best = ObjectVocabulary.bestMatch(in: labels) {
+        if let recognition = await recognizer.recognize(data, target: language, native: native) {
             phase = .result(CaptureResult(
                 display: cutout ?? data,
-                english: best.english,
-                native: best.turkish,
+                word: recognition.word,
+                native: recognition.native,
                 cutout: cutout
             ))
-            speech.speak(best.english, language: .englishUS)
+            speech.speak(recognition.word, language: language)
         } else {
             phase = .noMatch(data)
         }
     }
 
     private func confirm(_ result: CaptureResult) {
-        store.captureObject(english: result.english, native: result.native, image: result.cutout ?? result.display)
+        store.captureObject(english: result.word, native: result.native, image: result.cutout ?? result.display)
         selectedItem = nil
         onShowCollection()
     }
