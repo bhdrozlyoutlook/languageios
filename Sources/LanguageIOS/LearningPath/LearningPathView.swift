@@ -211,8 +211,8 @@ public struct LearningPathView: View {
 
     private var statsRow: some View {
         HStack(spacing: 16) {
-            statPill(icon: "flame.fill", value: "\(store.streak)", tint: MapTheme.coral)
-            statPill(icon: "star.circle.fill", value: "\(store.xp) XP", tint: MapTheme.teal)
+            statPill(icon: "flame.fill", value: "\(store.streak)", tint: MapTheme.coral, label: "Seri: \(store.streak) gün")
+            statPill(icon: "star.circle.fill", value: "\(store.xp) XP", tint: MapTheme.teal, label: "\(store.xp) XP")
             Spacer()
             TimelineView(.periodic(from: Date(), by: 30)) { _ in
                 heartsView
@@ -236,6 +236,8 @@ public struct LearningPathView: View {
                     .foregroundStyle(MapTheme.ink.opacity(0.5))
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(hearts) can")
     }
 
     private func formatRefill(_ seconds: TimeInterval) -> String {
@@ -244,7 +246,7 @@ public struct LearningPathView: View {
         return minutes > 0 ? "\(minutes)dk" : "\(total)sn"
     }
 
-    private func statPill(icon: String, value: String, tint: Color) -> some View {
+    private func statPill(icon: String, value: String, tint: Color, label: String) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.subheadline)
@@ -253,6 +255,8 @@ public struct LearningPathView: View {
                 .font(.subheadline.weight(.bold))
                 .foregroundStyle(MapTheme.ink)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label)
     }
 
     private func progressBar(done: Int, total: Int) -> some View {

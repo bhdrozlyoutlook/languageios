@@ -188,6 +188,8 @@ public struct ProfileView: View {
         .padding(.vertical, 14)
         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(OnboardingTheme.paper))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(OnboardingTheme.cardBorder, lineWidth: 1))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(label): \(value)")
     }
 
     // MARK: Stats
@@ -259,6 +261,7 @@ public struct ProfileView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(language.title)\(language == currentLanguage ? ", seçili" : "")")
                 }
             }
         }

@@ -315,6 +315,19 @@ struct OptionRow: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
+        .accessibilityValue(accessibilityValue)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var accessibilityValue: String {
+        switch state {
+        case .correct: "doğru"
+        case .wrong: "yanlış"
+        case .selected: "seçili"
+        case .idle: ""
+        }
     }
 
     private var icon: String? {
