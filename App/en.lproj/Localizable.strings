@@ -282,5 +282,4 @@
 "Geri" = "Back";
 "Premium (Haftalık)" = "Premium (Weekly)";
 "Premium (Aylık)" = "Premium (Monthly)";
-"10 Jeton" = "10 Tokens";
-"50 Jeton" = "50 Tokens";
+"%lld Jeton" = "%lld Tokens";

@@ -4,9 +4,21 @@ import Foundation
 public enum TokenPack: String, CaseIterable, Sendable {
     case ten
     case fifty
+    case hundred
+    case twoFifty
+    case fiveHundred
 
-    public var tokenCount: Int { self == .ten ? 10 : 50 }
-    public var idSuffix: String { self == .ten ? "10" : "50" }
+    public var tokenCount: Int {
+        switch self {
+        case .ten: 10
+        case .fifty: 50
+        case .hundred: 100
+        case .twoFifty: 250
+        case .fiveHundred: 500
+        }
+    }
+
+    public var idSuffix: String { String(tokenCount) }
 }
 
 /// The in-app purchase catalog. Product IDs are the frozen contract App Store Connect must
@@ -26,17 +38,20 @@ public enum PurchaseProduct: Equatable, Sendable {
 
     public init?(productID: String) {
         guard productID.hasPrefix(Self.prefix) else { return nil }
-        switch String(productID.dropFirst(Self.prefix.count)) {
-        case "premium.weekly": self = .premium(.weekly)
-        case "premium.monthly": self = .premium(.monthly)
-        case "tokens.10": self = .tokens(.ten)
-        case "tokens.50": self = .tokens(.fifty)
-        default: return nil
+        let suffix = String(productID.dropFirst(Self.prefix.count))
+        for period in RenewalPeriod.allCases where suffix == "premium.\(period.rawValue)" {
+            self = .premium(period)
+            return
         }
+        for pack in TokenPack.allCases where suffix == "tokens.\(pack.idSuffix)" {
+            self = .tokens(pack)
+            return
+        }
+        return nil
     }
 
     public static var all: [PurchaseProduct] {
-        [.premium(.weekly), .premium(.monthly), .tokens(.ten), .tokens(.fifty)]
+        RenewalPeriod.allCases.map { .premium($0) } + TokenPack.allCases.map { .tokens($0) }
     }
 }
 
@@ -70,8 +85,7 @@ public struct PurchaseProductInfo: Identifiable, Equatable, Sendable {
         switch product {
         case .premium(.weekly): String(localized: "Premium (Haftalık)")
         case .premium(.monthly): String(localized: "Premium (Aylık)")
-        case .tokens(.ten): String(localized: "10 Jeton")
-        case .tokens(.fifty): String(localized: "50 Jeton")
+        case .tokens(let pack): String(localized: "\(pack.tokenCount) Jeton")
         }
     }
 
@@ -79,8 +93,14 @@ public struct PurchaseProductInfo: Identifiable, Equatable, Sendable {
         switch product {
         case .premium(.weekly): "₺49,99"
         case .premium(.monthly): "₺149,99"
-        case .tokens(.ten): "₺29,99"
-        case .tokens(.fifty): "₺99,99"
+        case .tokens(let pack):
+            switch pack {
+            case .ten: "₺29,99"
+            case .fifty: "₺99,99"
+            case .hundred: "₺179,99"
+            case .twoFifty: "₺399,99"
+            case .fiveHundred: "₺699,99"
+            }
         }
     }
 }
