@@ -75,7 +75,10 @@ public extension AppEnvironment {
 
         let speech: SpeechService
         #if canImport(AVFAudio)
-        speech = AVSpeechService()
+        let elevenKey = Secrets.elevenLabsAPIKey
+        speech = elevenKey.isEmpty
+            ? AVSpeechService()
+            : ElevenLabsSpeechService(apiKey: elevenKey, voiceID: Secrets.elevenLabsVoiceID, fallback: AVSpeechService())
         #else
         speech = NoopSpeechService()
         #endif

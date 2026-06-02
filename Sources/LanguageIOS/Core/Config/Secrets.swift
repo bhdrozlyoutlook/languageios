@@ -8,6 +8,12 @@ import Foundation
 public enum Secrets {
     public static var geminiAPIKey: String { value(for: "GEMINI_API_KEY") }
     public static var elevenLabsAPIKey: String { value(for: "ELEVENLABS_API_KEY") }
+    /// ElevenLabs voice id (override via `ELEVENLABS_VOICE_ID`). Defaults to a public
+    /// multilingual voice (Rachel).
+    public static var elevenLabsVoiceID: String {
+        let id = value(for: "ELEVENLABS_VOICE_ID")
+        return id.isEmpty ? "21m00Tcm4TlvDq8ikWAM" : id
+    }
     /// RevenueCat public SDK key. When set (and the RevenueCat SPM package is added), the
     /// purchase seam uses RevenueCat instead of the local fake.
     public static var revenueCatAPIKey: String { value(for: "REVENUECAT_API_KEY") }
