@@ -13,6 +13,7 @@ public struct LearningPathView: View {
     @State private var showNoHearts = false
     @State private var showProfile = false
     @State private var showObjects = false
+    @State private var showAI = false
 
     private enum ActiveLesson: Identifiable {
         case stop(LearningStop)
@@ -64,6 +65,9 @@ public struct LearningPathView: View {
         }
         .sheet(isPresented: $showProfile) { profileSheet }
         .sheet(isPresented: $showObjects) { objectSheet }
+        .sheet(isPresented: $showAI) {
+            SentenceAnalysisView(speech: env.speech, language: language, onClose: { showAI = false })
+        }
     }
 
     private var objectSheet: some View {
@@ -184,6 +188,15 @@ public struct LearningPathView: View {
                 }
 
                 Spacer(minLength: 8)
+
+                Button { showAI = true } label: {
+                    Image(systemName: "sparkles")
+                        .font(.title2)
+                        .foregroundStyle(MapTheme.ink)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(MapTheme.paper.opacity(0.9)))
+                }
+                .accessibilityLabel("AI cümle analizi")
 
                 Button { showObjects = true } label: {
                     Image(systemName: "camera.viewfinder")

@@ -220,6 +220,18 @@
 "Tutarlı %lld dakika = haftada ~%lld dk = ay sonu ciddi mesafe. Küçük adımlar büyük fark yaratır." = "A steady %lld min = ~%lld min/week = serious distance by month's end. Small steps make a big difference.";
 "Bu seçim, planının önemli bir parçası." = "This choice is an important part of your plan.";
 
+/* ===== AI sentence analysis ===== */
+"AI cümle analizi" = "AI sentence analysis";
+"Hedef dilde bir cümle yaz; düzeltip kısa notlar verelim." = "Write a sentence in the target language; we'll correct it and add short notes.";
+"Cümleni yaz" = "Type your sentence";
+"Analiz et" = "Analyze";
+"Şimdilik temel dilbilgisi kontrolü; gelişmiş AI analiz yakında." = "Basic grammar check for now; advanced AI analysis coming soon.";
+"Doğru görünüyor" = "Looks correct";
+"Önerilen düzeltme" = "Suggested correction";
+"Cümle büyük harfle başlamalı." = "The sentence should start with a capital letter.";
+"Cümle sonuna noktalama ekledim." = "I added punctuation at the end.";
+"Cümlen iyi görünüyor. 👍" = "Your sentence looks good. 👍";
+
 /* ===== Accessibility ===== */
 "Kilitli" = "Locked";
 "Aktif, başlamak için dokun" = "Active, tap to start";
