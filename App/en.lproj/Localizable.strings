@@ -309,3 +309,12 @@
 "%lld kelime tekrar edildi." = "Reviewed %lld words.";
 "Bitir" = "Finish";
 "Kelimeleri tekrar et" = "Review words";
+
+/* ===== Profile membership ===== */
+"Üyelik" = "Membership";
+"Premium" = "Premium";
+"Freemium" = "Freemium";
+"Bu dönem hakkın" = "This period's quota";
+"Jeton" = "Tokens";
+"Premium'a yükselt" = "Upgrade to Premium";
+"Aboneliği yönet" = "Manage subscription";

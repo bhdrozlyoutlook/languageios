@@ -13,6 +13,7 @@ public struct ProfileView: View {
     @State private var reminderTimeValue: ReminderTime
     @State private var showTimePicker = false
     @State private var draftDate = Date()
+    @State private var entitlementStart: EntitlementFlowView.Screen?
 
     public init(
         store: AppStore,
@@ -36,6 +37,7 @@ public struct ProfileView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 22) {
                     heroStats
+                    membershipSection
                     statsSection
                     if let profile = store.userProfile() {
                         profileSection(profile)
@@ -50,6 +52,59 @@ public struct ProfileView: View {
         }
         .background(OnboardingTheme.background.ignoresSafeArea())
         .sheet(isPresented: $showTimePicker) { timePickerSheet }
+        .sheet(item: $entitlementStart) { start in
+            EntitlementFlowView(store: store, start: start, onClose: { entitlementStart = nil })
+        }
+    }
+
+    // MARK: Membership (subscription + tokens)
+
+    private var membershipSection: some View {
+        section(title: "Üyelik") {
+            if store.isPremium {
+                infoRow(icon: "crown.fill", label: "Üyelik", value: String(localized: "Premium"))
+                infoRow(
+                    icon: "photo.badge.checkmark",
+                    label: "Bu dönem hakkın",
+                    value: "\(store.photoQuotaRemaining())/\(store.photoQuotaLimit)"
+                )
+            } else {
+                infoRow(icon: "person.fill", label: "Üyelik", value: String(localized: "Freemium"))
+            }
+            infoRow(icon: "circlebadge.2.fill", label: "Jeton", value: "\(store.tokenBalance)")
+
+            if !store.isPremium {
+                membershipButton(title: "Premium'a yükselt", filled: true) { entitlementStart = .paywallPremium }
+            }
+            membershipButton(title: "Jeton al", filled: false) { entitlementStart = .paywallTokens }
+            membershipButton(title: "Satın alımları geri yükle", filled: false) {
+                Task { await store.restorePurchases() }
+            }
+            #if os(iOS)
+            if store.isPremium, let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                Link(destination: url) {
+                    membershipButtonLabel(title: "Aboneliği yönet", filled: false)
+                }
+            }
+            #endif
+        }
+    }
+
+    private func membershipButton(title: LocalizedStringKey, filled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) { membershipButtonLabel(title: title, filled: filled) }
+            .buttonStyle(.plain)
+    }
+
+    private func membershipButtonLabel(title: LocalizedStringKey, filled: Bool) -> some View {
+        Text(title)
+            .font(.subheadline.bold())
+            .foregroundStyle(filled ? .white : OnboardingTheme.teal)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(filled ? OnboardingTheme.teal : OnboardingTheme.paper))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(filled ? Color.clear : OnboardingTheme.cardBorder, lineWidth: 1))
     }
 
     // MARK: Reminder settings
