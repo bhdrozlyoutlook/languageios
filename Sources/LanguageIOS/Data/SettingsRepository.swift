@@ -7,15 +7,21 @@ public protocol SettingsRepository: AnyObject {
 
     var lastTargetLanguage: TargetLanguage? { get }
     func setLastTargetLanguage(_ language: TargetLanguage?) throws
+
+    var dailyReminderEnabled: Bool { get }
+    func setDailyReminderEnabled(_ value: Bool) throws
 }
 
 struct SettingsBlob: Codable, Equatable {
     var hasCompletedOnboarding: Bool
     var lastTargetLanguageRaw: String?
+    /// `nil` (legacy/default) is treated as enabled.
+    var dailyReminderEnabled: Bool?
 
-    init(hasCompletedOnboarding: Bool = false, lastTargetLanguageRaw: String? = nil) {
+    init(hasCompletedOnboarding: Bool = false, lastTargetLanguageRaw: String? = nil, dailyReminderEnabled: Bool? = nil) {
         self.hasCompletedOnboarding = hasCompletedOnboarding
         self.lastTargetLanguageRaw = lastTargetLanguageRaw
+        self.dailyReminderEnabled = dailyReminderEnabled
     }
 }
 
@@ -45,6 +51,16 @@ public final class UserDefaultsSettingsRepository: SettingsRepository {
     public func setLastTargetLanguage(_ language: TargetLanguage?) throws {
         var blob = load()
         blob.lastTargetLanguageRaw = language?.rawValue
+        try persist(blob)
+    }
+
+    public var dailyReminderEnabled: Bool {
+        load().dailyReminderEnabled ?? true
+    }
+
+    public func setDailyReminderEnabled(_ value: Bool) throws {
+        var blob = load()
+        blob.dailyReminderEnabled = value
         try persist(blob)
     }
 

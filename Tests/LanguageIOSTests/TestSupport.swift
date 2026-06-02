@@ -26,9 +26,11 @@ final class SpyNotificationScheduler: NotificationScheduling {
     private(set) var dailyReminders: [(time: ReminderTime, body: String)] = []
     private(set) var heartRefills: [(seconds: TimeInterval, body: String)] = []
     private(set) var heartRefillCancelCount = 0
+    private(set) var dailyReminderCancelCount = 0
 
     func requestAuthorization() async -> Bool { true }
     func scheduleDailyReminder(at time: ReminderTime, body: String) { dailyReminders.append((time, body)) }
+    func cancelDailyReminder() { dailyReminderCancelCount += 1 }
     func scheduleHeartRefill(after seconds: TimeInterval, body: String) { heartRefills.append((seconds, body)) }
     func cancelHeartRefill() { heartRefillCancelCount += 1 }
 }

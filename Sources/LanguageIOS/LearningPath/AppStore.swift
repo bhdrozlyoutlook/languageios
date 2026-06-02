@@ -158,6 +158,41 @@ public final class AppStore {
         }
     }
 
+    // MARK: Reminder settings
+
+    public var dailyReminderEnabled: Bool { settings.dailyReminderEnabled }
+
+    public func reminderTime() -> ReminderTime {
+        profiles.loadProfile()?.reminderTime ?? .defaultReminder
+    }
+
+    public func setDailyReminderEnabled(_ enabled: Bool) {
+        do {
+            try settings.setDailyReminderEnabled(enabled)
+        } catch {
+            handle(error, context: "setDailyReminderEnabled", fallbackKey: PersistenceSchema.settingsKey)
+        }
+        if enabled {
+            Task { _ = await notifications.requestAuthorization() }
+            rescheduleStreakReminder()
+        } else {
+            notifications.cancelDailyReminder()
+        }
+    }
+
+    public func setReminderTime(_ time: ReminderTime) {
+        var profile = profiles.loadProfile() ?? UserProfile()
+        profile.reminderTime = time
+        do {
+            try profiles.save(profile)
+        } catch {
+            handle(error, context: "setReminderTime", fallbackKey: PersistenceSchema.profileKey)
+        }
+        if settings.dailyReminderEnabled {
+            rescheduleStreakReminder()
+        }
+    }
+
     public func recordLessonPassed(stopId: String, stars: Int) {
         let previousStreak = gamification.streak
         gamification.recordPass(stopId: stopId, stars: stars, now: Date())

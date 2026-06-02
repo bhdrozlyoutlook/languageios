@@ -9,6 +9,11 @@ public struct ProfileView: View {
     private let onRestartOnboarding: () -> Void
     private let onClose: () -> Void
 
+    @State private var reminderEnabled: Bool
+    @State private var reminderTimeValue: ReminderTime
+    @State private var showTimePicker = false
+    @State private var draftDate = Date()
+
     public init(
         store: AppStore,
         currentLanguage: TargetLanguage,
@@ -21,6 +26,8 @@ public struct ProfileView: View {
         self.onSwitchLanguage = onSwitchLanguage
         self.onRestartOnboarding = onRestartOnboarding
         self.onClose = onClose
+        _reminderEnabled = State(initialValue: store.dailyReminderEnabled)
+        _reminderTimeValue = State(initialValue: store.reminderTime())
     }
 
     public var body: some View {
@@ -33,6 +40,7 @@ public struct ProfileView: View {
                     if let profile = store.userProfile() {
                         profileSection(profile)
                     }
+                    reminderSection
                     languageSwitcher
                     restartButton
                 }
@@ -40,6 +48,105 @@ public struct ProfileView: View {
             }
         }
         .background(OnboardingTheme.background.ignoresSafeArea())
+        .sheet(isPresented: $showTimePicker) { timePickerSheet }
+    }
+
+    // MARK: Reminder settings
+
+    private var reminderSection: some View {
+        section(title: "Hatırlatma") {
+            HStack(spacing: 12) {
+                Image(systemName: "bell.fill")
+                    .font(.subheadline).foregroundStyle(OnboardingTheme.teal).frame(width: 22)
+                Toggle("Günlük hatırlatma", isOn: $reminderEnabled)
+                    .font(.subheadline)
+                    .tint(OnboardingTheme.teal)
+                    .onChange(of: reminderEnabled) { _, value in store.setDailyReminderEnabled(value) }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(cardShape)
+
+            Button {
+                draftDate = date(from: reminderTimeValue)
+                showTimePicker = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "clock.fill")
+                        .font(.subheadline).foregroundStyle(OnboardingTheme.teal).frame(width: 22)
+                    Text("Hatırlatma saati")
+                        .font(.subheadline).foregroundStyle(OnboardingTheme.ink.opacity(0.7))
+                    Spacer(minLength: 8)
+                    Text(reminderTimeValue.formatted)
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(OnboardingTheme.ink)
+                    Image(systemName: "chevron.right")
+                        .font(.caption).foregroundStyle(OnboardingTheme.ink.opacity(0.3))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(cardShape)
+            }
+            .buttonStyle(.plain)
+            .disabled(!reminderEnabled)
+            .opacity(reminderEnabled ? 1 : 0.5)
+        }
+    }
+
+    private var timePickerSheet: some View {
+        VStack(spacing: 14) {
+            Text("Hatırlatma saati")
+                .font(.headline).foregroundStyle(OnboardingTheme.ink).padding(.top, 20)
+            timePicker
+            LessonActionButton(title: "Kaydet", tint: OnboardingTheme.teal) {
+                let value = time(from: draftDate)
+                reminderTimeValue = value
+                store.setReminderTime(value)
+                showTimePicker = false
+            }
+            .padding(.horizontal, 20)
+            Button("Vazgeç") { showTimePicker = false }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(OnboardingTheme.ink.opacity(0.6))
+                .padding(.bottom, 18)
+        }
+        .frame(maxWidth: .infinity)
+        .background(OnboardingTheme.background.ignoresSafeArea())
+    }
+
+    @ViewBuilder
+    private var timePicker: some View {
+        #if os(iOS)
+        DatePicker("", selection: $draftDate, displayedComponents: .hourAndMinute)
+            .datePickerStyle(.wheel)
+            .labelsHidden()
+            .environment(\.locale, Locale(identifier: "tr_TR"))
+        #else
+        DatePicker("", selection: $draftDate, displayedComponents: .hourAndMinute)
+            .datePickerStyle(.field)
+            .labelsHidden()
+        #endif
+    }
+
+    private var cardShape: some View {
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .fill(OnboardingTheme.paper)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(OnboardingTheme.cardBorder, lineWidth: 1)
+            )
+    }
+
+    private func date(from time: ReminderTime) -> Date {
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        components.hour = time.hour
+        components.minute = time.minute
+        return Calendar.current.date(from: components) ?? Date()
+    }
+
+    private func time(from date: Date) -> ReminderTime {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return ReminderTime(hour: components.hour ?? 19, minute: components.minute ?? 0)
     }
 
     private var topBar: some View {
