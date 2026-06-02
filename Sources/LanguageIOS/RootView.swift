@@ -24,9 +24,9 @@ public struct RootView: View {
             }
         }
         .task {
-            // Brief branded splash that masks first-frame setup, then fades to content.
-            try? await Task.sleep(nanoseconds: 750_000_000)
-            withAnimation(.easeOut(duration: 0.45)) { showSplash = false }
+            // Branded splash that masks first-frame setup, then fades to content.
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
+            withAnimation(.easeOut(duration: 0.5)) { showSplash = false }
         }
         .environment(\.appEnvironment, environment)
         .onAppear { environment.crashReporter.recordBreadcrumb("app launched", category: .app) }
