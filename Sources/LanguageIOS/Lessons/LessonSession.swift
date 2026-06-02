@@ -20,11 +20,17 @@ public final class LessonSession {
     public private(set) var status: Status = .inProgress
 
     @ObservationIgnored private let analytics: AnalyticsService
+    @ObservationIgnored private let onWordResult: ((VocabularyItem, Bool) -> Void)?
 
-    public init(lesson: Lesson, analytics: AnalyticsService = NoopAnalyticsService()) {
+    public init(
+        lesson: Lesson,
+        analytics: AnalyticsService = NoopAnalyticsService(),
+        onWordResult: ((VocabularyItem, Bool) -> Void)? = nil
+    ) {
         self.lesson = lesson
         self.hearts = Self.maxHearts
         self.analytics = analytics
+        self.onWordResult = onWordResult
         analytics.track(LessonAnalytics.started(stopId: lesson.stopId, language: lesson.language))
     }
 
@@ -50,6 +56,9 @@ public final class LessonSession {
             analytics.track(LessonAnalytics.exerciseAnswered(
                 stopId: lesson.stopId, kind: exercise.kind, correct: correct
             ))
+            if let item = exercise.primaryItem {
+                onWordResult?(item, correct)
+            }
             if correct {
                 correctCount += 1
             } else {

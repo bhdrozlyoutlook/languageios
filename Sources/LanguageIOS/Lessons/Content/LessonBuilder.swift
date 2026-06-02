@@ -17,7 +17,12 @@ enum LessonBuilder {
 
     /// Builds a mixed review lesson from the vocabulary of already-completed stops.
     /// Returns nil if there aren't enough learned words yet.
-    static func review(language: TargetLanguage, completedStops: [LearningStop], limit: Int = 6) -> Lesson? {
+    static func review(
+        language: TargetLanguage,
+        completedStops: [LearningStop],
+        prioritized: Set<String> = [],
+        limit: Int = 6
+    ) -> Lesson? {
         guard !completedStops.isEmpty else { return nil }
 
         var pool: [VocabularyItem] = []
@@ -29,7 +34,11 @@ enum LessonBuilder {
             }
         }
 
-        let items = Array(pool.shuffled().prefix(limit))
+        // Missed words first (spaced repetition), then the rest — both shuffled for variety.
+        let shuffled = pool.shuffled()
+        let ordered = shuffled.filter { prioritized.contains($0.id) }
+            + shuffled.filter { !prioritized.contains($0.id) }
+        let items = Array(ordered.prefix(limit))
         guard items.count >= 2 else { return nil }
 
         return Lesson(

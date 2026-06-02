@@ -47,6 +47,16 @@ public enum Exercise: Equatable {
         kind != .flashcard
     }
 
+    /// The vocabulary item an exercise is primarily about (nil for matching, which
+    /// covers several words at once).
+    public var primaryItem: VocabularyItem? {
+        switch self {
+        case .flashcard(let item), .typeAnswer(let item): item
+        case .multipleChoice(let prompt, _, _), .listenSelect(let prompt, _, _): prompt
+        case .matching: nil
+        }
+    }
+
     /// The expected answer for single-answer exercises (nil for flashcard/matching).
     public var correctAnswer: String? {
         switch self {

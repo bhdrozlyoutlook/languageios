@@ -15,9 +15,10 @@ public struct LessonView: View {
         speech: SpeechService,
         onPassed: @escaping (Int) -> Void,
         onFailed: @escaping () -> Void = {},
+        onWordResult: @escaping (VocabularyItem, Bool) -> Void = { _, _ in },
         onClose: @escaping () -> Void
     ) {
-        _session = State(initialValue: LessonSession(lesson: lesson, analytics: analytics))
+        _session = State(initialValue: LessonSession(lesson: lesson, analytics: analytics, onWordResult: onWordResult))
         self.speech = speech
         self.onPassed = onPassed
         self.onFailed = onFailed

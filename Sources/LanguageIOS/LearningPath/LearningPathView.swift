@@ -104,6 +104,7 @@ public struct LearningPathView: View {
                     }
                 },
                 onFailed: { store.recordLessonFailed() },
+                onWordResult: { item, correct in store.recordWordResult(wordId: item.id, correct: correct) },
                 onClose: { activeLesson = nil }
             )
         case .review(let lesson):
@@ -116,6 +117,7 @@ public struct LearningPathView: View {
                     activeLesson = nil
                 },
                 onFailed: {},
+                onWordResult: { item, correct in store.recordWordResult(wordId: item.id, correct: correct) },
                 onClose: { activeLesson = nil }
             )
         }
@@ -126,7 +128,11 @@ public struct LearningPathView: View {
         if progress.completedCount > 0 {
             Button {
                 let completed = Array(journey.stops.prefix(progress.completedCount))
-                if let lesson = LessonBuilder.review(language: language, completedStops: completed) {
+                if let lesson = LessonBuilder.review(
+                    language: language,
+                    completedStops: completed,
+                    prioritized: store.missedWordIds
+                ) {
                     activeLesson = .review(lesson)
                 }
             } label: {

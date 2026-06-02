@@ -122,6 +122,14 @@ public final class AppStore {
     public func stars(forStop stopId: String) -> Int { gamification.stars(for: stopId) }
     public func canStartLesson() -> Bool { availableHearts() > 0 }
 
+    /// Word ids the user has missed; review prioritizes these.
+    public var missedWordIds: Set<String> { gamification.missedWordIds }
+
+    public func recordWordResult(wordId: String, correct: Bool) {
+        gamification.recordWordResult(wordId: wordId, correct: correct)
+        persistGamification()
+    }
+
     // MARK: Profile & stats
 
     public var totalStars: Int { gamification.starsByStop.values.reduce(0, +) }

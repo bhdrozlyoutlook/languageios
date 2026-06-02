@@ -11,6 +11,8 @@ public struct GamificationState: Codable, Equatable {
     public var hearts: Int
     /// Anchor for refill timing; `nil` means the pool is full (no timer running).
     public var heartsUpdatedAt: Date?
+    /// Word ids the user got wrong; review prioritizes these (spaced repetition).
+    public var missedWordIds: Set<String>
 
     public static let maxHearts = 5
     public static let heartRefillInterval: TimeInterval = 20 * 60 // 20 minutes
@@ -21,7 +23,8 @@ public struct GamificationState: Codable, Equatable {
         lastActiveDate: Date? = nil,
         starsByStop: [String: Int] = [:],
         hearts: Int = GamificationState.maxHearts,
-        heartsUpdatedAt: Date? = nil
+        heartsUpdatedAt: Date? = nil,
+        missedWordIds: Set<String> = []
     ) {
         self.xp = xp
         self.streak = streak
@@ -29,6 +32,20 @@ public struct GamificationState: Codable, Equatable {
         self.starsByStop = starsByStop
         self.hearts = hearts
         self.heartsUpdatedAt = heartsUpdatedAt
+        self.missedWordIds = missedWordIds
+    }
+
+    // Backward-compatible decoding: `missedWordIds` is optional in stored data so older
+    // saved state keeps loading (other fields predate this and are always present).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        xp = try container.decode(Int.self, forKey: .xp)
+        streak = try container.decode(Int.self, forKey: .streak)
+        lastActiveDate = try container.decodeIfPresent(Date.self, forKey: .lastActiveDate)
+        starsByStop = try container.decode([String: Int].self, forKey: .starsByStop)
+        hearts = try container.decode(Int.self, forKey: .hearts)
+        heartsUpdatedAt = try container.decodeIfPresent(Date.self, forKey: .heartsUpdatedAt)
+        missedWordIds = try container.decodeIfPresent(Set<String>.self, forKey: .missedWordIds) ?? []
     }
 
     /// XP awarded for passing a lesson with the given stars.
@@ -78,6 +95,20 @@ public struct GamificationState: Codable, Equatable {
     public mutating func recordPractice(xpGain: Int, now: Date, calendar: Calendar = .current) {
         xp += max(0, xpGain)
         updateStreak(now: now, calendar: calendar)
+    }
+
+    // MARK: Spaced repetition
+
+    public mutating func recordWordResult(wordId: String, correct: Bool) {
+        if correct {
+            missedWordIds.remove(wordId)
+        } else {
+            missedWordIds.insert(wordId)
+        }
+    }
+
+    public func needsReview(_ wordId: String) -> Bool {
+        missedWordIds.contains(wordId)
     }
 
     private mutating func updateStreak(now: Date, calendar: Calendar) {
