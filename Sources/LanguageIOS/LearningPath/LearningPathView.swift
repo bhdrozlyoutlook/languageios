@@ -213,6 +213,12 @@ public struct LearningPathView: View {
         HStack(spacing: 16) {
             statPill(icon: "flame.fill", value: "\(store.streak)", tint: MapTheme.coral, label: "Seri: \(store.streak) gün")
             statPill(icon: "star.circle.fill", value: "\(store.xp) XP", tint: MapTheme.teal, label: "\(store.xp) XP")
+            statPill(
+                icon: store.dailyGoalReached ? "checkmark.circle.fill" : "target",
+                value: "\(store.activitiesToday)/\(store.dailyGoalTarget)",
+                tint: store.dailyGoalReached ? .green : MapTheme.teal,
+                label: "Bugünkü hedef: \(store.activitiesToday) bölü \(store.dailyGoalTarget)"
+            )
             Spacer()
             TimelineView(.periodic(from: Date(), by: 30)) { _ in
                 heartsView

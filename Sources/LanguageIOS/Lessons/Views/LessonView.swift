@@ -120,7 +120,13 @@ public struct LessonView: View {
     }
 
     private func handleResult(_ correct: Bool) {
+        if session.currentExercise?.isGraded == true {
+            correct ? Haptics.success() : Haptics.warning()
+        }
         session.submit(correct: correct)
+        if session.status == .passed {
+            Haptics.success()
+        }
     }
 }
 
