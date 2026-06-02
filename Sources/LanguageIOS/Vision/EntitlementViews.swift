@@ -1,5 +1,13 @@
 import SwiftUI
 
+/// Legal links shown on the paywall (App Store requires Terms + Privacy for subscriptions).
+enum EntitlementLegal {
+    /// Apple's Standard EULA is acceptable as Terms of Use. Replace if you host your own.
+    static let terms = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    /// TODO: replace with your hosted privacy-policy URL before App Store submission.
+    static let privacy = URL(string: "https://bhdrozlyoutlook.github.io/languageios/privacy")!
+}
+
 /// Single source of truth for whether photo-word capture is allowed right now. The UI keys
 /// off this, never the tier alone (a freemium user holding tokens is `.allowed`).
 enum CaptureAccess: Equatable {
@@ -117,8 +125,8 @@ struct EntitlementFlowView: View {
         switch screen {
         case .freemiumGate: freemiumGate
         case .premiumExhausted: premiumExhausted
-        case .paywallPremium: paywall(title: String(localized: "Premium ol"), products: store.premiumPlans())
-        case .paywallTokens: paywall(title: String(localized: "Jeton al"), products: store.tokenPackages())
+        case .paywallPremium: paywall(title: String(localized: "Premium ol"), products: store.premiumPlans(), isSubscription: true)
+        case .paywallTokens: paywall(title: String(localized: "Jeton al"), products: store.tokenPackages(), isSubscription: false)
         }
     }
 
@@ -151,11 +159,12 @@ struct EntitlementFlowView: View {
             ForEach(store.tokenPackages()) { info in
                 productRow(info) { Task { await purchase(info.product) } }
             }
+            legalFooter(isSubscription: false)
         }
         .padding(.top, 18)
     }
 
-    private func paywall(title: String, products: [PurchaseProductInfo]) -> some View {
+    private func paywall(title: String, products: [PurchaseProductInfo], isSubscription: Bool) -> some View {
         VStack(spacing: 14) {
             Text(title)
                 .font(.title2.bold()).foregroundStyle(OnboardingTheme.ink)
@@ -163,11 +172,48 @@ struct EntitlementFlowView: View {
             ForEach(products) { info in
                 productRow(info) { Task { await purchase(info.product) } }
             }
-            Text("Şu an deneme: gerçek ödeme yok")
-                .font(.caption).foregroundStyle(OnboardingTheme.ink.opacity(0.4))
-                .padding(.top, 6)
+            legalFooter(isSubscription: isSubscription)
         }
         .padding(.top, 10)
+    }
+
+    /// Restore button + subscription terms + Terms/Privacy links — required by App Store
+    /// review wherever purchases are offered.
+    private func legalFooter(isSubscription: Bool) -> some View {
+        VStack(spacing: 10) {
+            if isSubscription {
+                Text("Premium otomatik yenilenen bir aboneliktir. Ücret, satın alma onaylandığında Apple ID hesabından tahsil edilir; dönem bitiminden en az 24 saat önce iptal edilmezse otomatik yenilenir. Aboneliği iOS Ayarlar ▸ Apple Kimliği ▸ Abonelikler'den yönetebilir veya iptal edebilirsin.")
+                    .font(.caption2)
+                    .foregroundStyle(OnboardingTheme.ink.opacity(0.5))
+                    .multilineTextAlignment(.center)
+            }
+
+            Button { Task { await restore() } } label: {
+                Text("Satın alımları geri yükle")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(OnboardingTheme.teal)
+            }
+            .disabled(isWorking)
+
+            HStack(spacing: 6) {
+                Link("Kullanım Şartları", destination: EntitlementLegal.terms)
+                Text("·").foregroundStyle(OnboardingTheme.ink.opacity(0.3))
+                Link("Gizlilik Politikası", destination: EntitlementLegal.privacy)
+            }
+            .font(.caption)
+            .foregroundStyle(OnboardingTheme.teal)
+
+            Text("Şu an deneme: gerçek ödeme yok")
+                .font(.caption2).foregroundStyle(OnboardingTheme.ink.opacity(0.35))
+        }
+        .padding(.top, 6)
+    }
+
+    private func restore() async {
+        isWorking = true
+        await store.restorePurchases()
+        isWorking = false
+        onClose()
     }
 
     // MARK: Pieces

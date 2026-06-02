@@ -283,3 +283,9 @@
 "Premium (Haftalık)" = "Premium (Weekly)";
 "Premium (Aylık)" = "Premium (Monthly)";
 "%lld Jeton" = "%lld Tokens";
+
+/* ===== Paywall legal / App Store compliance ===== */
+"Satın alımları geri yükle" = "Restore purchases";
+"Kullanım Şartları" = "Terms of Use";
+"Gizlilik Politikası" = "Privacy Policy";
+"Premium otomatik yenilenen bir aboneliktir. Ücret, satın alma onaylandığında Apple ID hesabından tahsil edilir; dönem bitiminden en az 24 saat önce iptal edilmezse otomatik yenilenir. Aboneliği iOS Ayarlar ▸ Apple Kimliği ▸ Abonelikler'den yönetebilir veya iptal edebilirsin." = "Premium is an auto-renewing subscription. Payment is charged to your Apple ID at confirmation of purchase and renews automatically unless cancelled at least 24 hours before the period ends. Manage or cancel it in iOS Settings ▸ Apple ID ▸ Subscriptions.";
