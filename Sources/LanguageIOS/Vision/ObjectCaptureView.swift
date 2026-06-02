@@ -21,7 +21,7 @@ public struct ObjectCaptureView: View {
 
     private enum Phase: Equatable {
         case capture
-        case processing
+        case processing(Data)
         case result(CaptureResult)
         case noMatch(Data)
     }
@@ -64,8 +64,8 @@ public struct ObjectCaptureView: View {
             switch phase {
             case .capture:
                 captureScreen
-            case .processing:
-                processingScreen
+            case .processing(let data):
+                processingScreen(data)
             case .result(let result):
                 resultScreen(result)
             case .noMatch(let data):
@@ -223,18 +223,32 @@ public struct ObjectCaptureView: View {
         #endif
     }
 
-    // MARK: Processing
+    // MARK: Processing (animated scan over the captured photo)
 
-    private var processingScreen: some View {
+    private func processingScreen(_ data: Data) -> some View {
         ZStack {
-            OnboardingTheme.background.ignoresSafeArea()
-            VStack(spacing: 16) {
-                ProgressView().scaleEffect(1.3)
-                Text("Obje tanınıyor…")
-                    .font(.subheadline)
-                    .foregroundStyle(OnboardingTheme.ink.opacity(0.6))
+            Color.black.ignoresSafeArea()
+            #if canImport(UIKit)
+            if let image = UIImage(data: data) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            #endif
+            ScanningOverlay()
+            VStack {
+                Spacer()
+                Label("Obje taranıyor…", systemImage: "sparkles")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 10)
+                    .background(Capsule().fill(.black.opacity(0.5)))
+                    .padding(.bottom, 44)
             }
         }
+        .transition(.opacity)
     }
 
     // MARK: Result (cutout sticker + word + ✓/↻/✗)
@@ -254,7 +268,7 @@ public struct ObjectCaptureView: View {
 
                 Spacer()
 
-                CutoutSticker(imageData: result.display)
+                CutoutSticker(imageData: result.display, outlined: result.cutout != nil)
                     .frame(maxWidth: 280, maxHeight: 280)
                     .padding(.horizontal, 30)
 
@@ -378,16 +392,24 @@ public struct ObjectCaptureView: View {
 
     // MARK: Actions
 
-    private func process(_ data: Data) async {
-        phase = .processing
-        let cutout = await extractor.extractSubject(from: data)
-        if let recognition = await recognizer.recognize(data, target: language, native: native) {
-            phase = .result(CaptureResult(
-                display: cutout ?? data,
-                word: recognition.word,
-                native: recognition.native,
-                cutout: cutout
-            ))
+    private func process(_ rawData: Data) async {
+        // Bake EXIF orientation in first, so the cutout / recognizer never see a sideways
+        // image (fixes the 90°-rotated sticker).
+        let data = ImageNormalizer.upright(rawData)
+        withAnimation(.easeInOut(duration: 0.25)) { phase = .processing(data) }
+        async let cutoutTask = extractor.extractSubject(from: data)
+        async let recognitionTask = recognizer.recognize(data, target: language, native: native)
+        let cutout = await cutoutTask
+        let recognition = await recognitionTask
+        if let recognition {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                phase = .result(CaptureResult(
+                    display: cutout ?? data,
+                    word: recognition.word,
+                    native: recognition.native,
+                    cutout: cutout
+                ))
+            }
             speech.speak(recognition.word, language: language)
         } else {
             phase = .noMatch(data)
@@ -423,5 +445,47 @@ private struct ReticleBrackets: Shape {
             path.addLine(to: end)
         }
         return path
+    }
+}
+
+/// Animated "scanning" overlay shown while the captured object is being recognized:
+/// dim wash, a centered reticle, and a bright line sweeping up and down the frame.
+private struct ScanningOverlay: View {
+    @State private var sweep = false
+
+    var body: some View {
+        GeometryReader { geo in
+            let reticle = min(geo.size.width, geo.size.height) * 0.66
+            ZStack {
+                Color.black.opacity(0.30).ignoresSafeArea()
+
+                ReticleBrackets()
+                    .stroke(Color.white.opacity(0.85), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .frame(width: reticle, height: reticle)
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+
+                LinearGradient(
+                    colors: [
+                        .clear,
+                        OnboardingTheme.teal.opacity(0.85),
+                        .white.opacity(0.95),
+                        OnboardingTheme.teal.opacity(0.85),
+                        .clear,
+                    ],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: 130)
+                .blur(radius: 2)
+                .frame(maxWidth: .infinity)
+                .position(x: geo.size.width / 2, y: sweep ? geo.size.height * 0.82 : geo.size.height * 0.18)
+                .shadow(color: OnboardingTheme.teal.opacity(0.6), radius: 12)
+            }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.05).repeatForever(autoreverses: true)) {
+                    sweep = true
+                }
+            }
+        }
+        .allowsHitTesting(false)
     }
 }

@@ -72,4 +72,10 @@ final class CaptureRepositoryTests: XCTestCase {
         let result = await PassthroughSubjectExtractor().extractSubject(from: data)
         XCTAssertEqual(result, data)
     }
+
+    func testImageNormalizerReturnsInputForNonImageData() {
+        // Non-decodable bytes can't be oriented, so they pass through untouched.
+        let junk = Data([0x00, 0x11, 0x22, 0x33])
+        XCTAssertEqual(ImageNormalizer.upright(junk), junk)
+    }
 }
