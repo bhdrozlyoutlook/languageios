@@ -44,7 +44,7 @@ public enum TargetLanguage: String, CaseIterable, Identifiable, Codable {
     public var id: String { rawValue }
 
     public var title: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .englishUK: "İngilizce (İngiliz)"
         case .englishUS: "İngilizce (Amerikan)"
         case .turkish: "Türkçe"
@@ -52,10 +52,11 @@ public enum TargetLanguage: String, CaseIterable, Identifiable, Codable {
         case .spanish: "İspanyolca"
         case .french: "Fransızca"
         }
+        return String(localized: value)
     }
 
     public var subtitle: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .englishUK: "Birleşik Krallık aksanı (BBC, Oxford)"
         case .englishUS: "ABD aksanı (Hollywood, Netflix)"
         case .turkish: "Türkiye"
@@ -63,6 +64,7 @@ public enum TargetLanguage: String, CaseIterable, Identifiable, Codable {
         case .spanish: "İspanya"
         case .french: "Fransa"
         }
+        return String(localized: value)
     }
 
     public var flag: String {
@@ -123,7 +125,7 @@ public enum CurrentLevel: String, CaseIterable, Identifiable, Hashable, Codable 
     public var id: String { rawValue }
 
     public var title: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .beginner: "Yeni başlıyorum"
         case .basicVocabulary: "Temel kelimeleri biliyorum"
         case .listening: "Sesli içerikleri anlıyorum"
@@ -132,10 +134,11 @@ public enum CurrentLevel: String, CaseIterable, Identifiable, Hashable, Codable 
         case .writing: "Yazılı ifadeler oluşturabiliyorum"
         case .advancedGrammar: "İleri gramer ve nüansa hakimim"
         }
+        return String(localized: value)
     }
 
     public var subtitle: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .beginner:
             "A1 • Harfler, sayılar ve ilk kelimeler"
         case .basicVocabulary:
@@ -151,6 +154,7 @@ public enum CurrentLevel: String, CaseIterable, Identifiable, Hashable, Codable 
         case .advancedGrammar:
             "C1-C2 • Karmaşık yapı, nüans ve ileri ifade"
         }
+        return String(localized: value)
     }
 }
 
@@ -166,7 +170,7 @@ public enum AgeRange: String, CaseIterable, Identifiable, Codable {
     public var id: String { rawValue }
 
     public var title: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .preschool: "Okul öncesi (3-5 yaş)"
         case .primary: "İlkokul (6-10 yaş)"
         case .teen: "13-17"
@@ -175,10 +179,11 @@ public enum AgeRange: String, CaseIterable, Identifiable, Codable {
         case .midAdult: "35-49"
         case .mature: "50+"
         }
+        return String(localized: value)
     }
 
     public var subtitle: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .preschool: "Şarkı, hikaye ve görsellerle eğlenceli tanışma"
         case .primary: "Okul derslerine destek, oyun temelli aktiviteler"
         case .teen: "Okul, sınav ve sosyal medya odaklı içerik"
@@ -187,6 +192,7 @@ public enum AgeRange: String, CaseIterable, Identifiable, Codable {
         case .midAdult: "Profesyonel iletişim, aile ve seyahat"
         case .mature: "Rahat tempo, kültür ve seyahat odaklı"
         }
+        return String(localized: value)
     }
 
     public var relevantLevels: [CurrentLevel] {
@@ -212,7 +218,7 @@ public enum LearningPurpose: String, CaseIterable, Identifiable, Codable {
     public var id: String { rawValue }
 
     public var title: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .travel: "Seyahat"
         case .work: "İş ve kariyer"
         case .education: "Eğitim ve sınav"
@@ -220,10 +226,11 @@ public enum LearningPurpose: String, CaseIterable, Identifiable, Codable {
         case .media: "Film, dizi, müzik"
         case .personalGrowth: "Kişisel gelişim"
         }
+        return String(localized: value)
     }
 
     public var subtitle: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .travel:
             "Yurt dışı tatil ve gezilerde rahat iletişim"
         case .work:
@@ -237,6 +244,7 @@ public enum LearningPurpose: String, CaseIterable, Identifiable, Codable {
         case .personalGrowth:
             "Hobi, kültür, beyin egzersizi"
         }
+        return String(localized: value)
     }
 }
 
@@ -250,17 +258,18 @@ public enum LearningStyle: String, CaseIterable, Identifiable, Codable {
     public var id: String { rawValue }
 
     public var title: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .cameraObjects: "Kamera ile objeler"
         case .musicLyrics: "Müzik ve şarkı sözleri"
         case .speakingPractice: "Konuşma pratiği"
         case .dailyLessons: "Kısa günlük dersler"
         case .aiExplanations: "AI açıklamalar"
         }
+        return String(localized: value)
     }
 
     public var subtitle: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .cameraObjects:
             "Gördüğün objeleri kamerayla etiketle, kelime hazineni gerçek dünyadan büyüt"
         case .musicLyrics:
@@ -272,6 +281,7 @@ public enum LearningStyle: String, CaseIterable, Identifiable, Codable {
         case .aiExplanations:
             "Cümlelerini AI'a analiz ettir, hatalarını anında ve açık şekilde öğren"
         }
+        return String(localized: value)
     }
 }
 
@@ -282,7 +292,7 @@ public enum DailyGoal: Int, CaseIterable, Identifiable, Codable {
     case thirtyMinutes = 30
 
     public var id: Int { rawValue }
-    public var title: String { "\(rawValue) dakika" }
+    public var title: String { String(localized: "\(rawValue) dakika") }
 
     /// Target number of completed lessons/practices per day for this goal.
     public var targetActivities: Int {
@@ -295,7 +305,7 @@ public enum DailyGoal: Int, CaseIterable, Identifiable, Codable {
     }
 
     public var subtitle: String {
-        switch self {
+        let value: String.LocalizationValue = switch self {
         case .fiveMinutes:
             "Mikro alışkanlık • Hiç başlamamaktan iyi, ritim kurar"
         case .tenMinutes:
@@ -305,6 +315,7 @@ public enum DailyGoal: Int, CaseIterable, Identifiable, Codable {
         case .thirtyMinutes:
             "Hızlı ilerleme • 6 ayda ciddi sıçrama, en kısa yol"
         }
+        return String(localized: value)
     }
 }
 

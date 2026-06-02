@@ -1,12 +1,105 @@
-/* English localization. Keys are the Turkish base strings used in localized Text / LocalizedStringKey. */
+/* English localization. Keys are the Turkish base strings used in localized Text / LocalizedStringKey / String(localized:). */
 
-/* Onboarding */
+/* ===== Onboarding: welcome ===== */
 "Dil öğrenmeyi hayatına taşı" = "Bring language learning into your life";
 "Gördüğün objelerden, dinlediğin şarkılardan ve konuşma pratiğinden sana özel dersler oluştur." = "Create personalized lessons from the objects you see, the songs you hear, and speaking practice.";
+"Kamera" = "Camera";
+"obje etiketi" = "object label";
+"analiz" = "analysis";
+"Müzik" = "Music";
 "Devam et" = "Continue";
 "Planımı kaydet" = "Save my plan";
 
-/* Lessons */
+/* ===== Onboarding: step titles ===== */
+"Hangi dili öğrenmek istiyorsun?" = "Which language do you want to learn?";
+"Ana dilin ne?" = "What's your native language?";
+"Yaş aralığın hangisi?" = "What's your age range?";
+"Günde ne kadar çalışmak istersin?" = "How much do you want to study per day?";
+"Şu an seviyen nasıl?" = "What's your level right now?";
+"Sana uyan tüm alanları seçebilirsin." = "You can select all the areas that fit you.";
+"Öğrenme amacın ne?" = "What's your goal for learning?";
+"Sana uyan tüm sebepleri seçebilirsin." = "You can select all the reasons that fit you.";
+"En çok nasıl öğrenmek istersin?" = "How do you most like to learn?";
+"Birden fazla seçim yapabilirsin." = "You can choose more than one.";
+"Ders hatırlatması ne zaman gelsin?" = "When should your lesson reminder arrive?";
+"Her gün bu saatte sana kısa bir push hatırlatma göndereceğiz." = "We'll send you a short push reminder at this time every day.";
+"İlerlemen, etiketlerin ve öğrenme geçmişin hesabında saklanır." = "Your progress, labels and learning history are saved to your account.";
+
+/* ===== Target languages ===== */
+"İngilizce (İngiliz)" = "English (British)";
+"İngilizce (Amerikan)" = "English (American)";
+"Türkçe" = "Turkish";
+"Almanca" = "German";
+"İspanyolca" = "Spanish";
+"Fransızca" = "French";
+"Birleşik Krallık aksanı (BBC, Oxford)" = "British accent (BBC, Oxford)";
+"ABD aksanı (Hollywood, Netflix)" = "American accent (Hollywood, Netflix)";
+"Türkiye" = "Turkey";
+"Almanya" = "Germany";
+"İspanya" = "Spain";
+"Fransa" = "France";
+
+/* ===== Current level ===== */
+"Yeni başlıyorum" = "I'm just starting";
+"Temel kelimeleri biliyorum" = "I know basic words";
+"Sesli içerikleri anlıyorum" = "I understand audio content";
+"Yazılı metinleri okuyabiliyorum" = "I can read written texts";
+"Günlük konularda konuşabiliyorum" = "I can talk about everyday topics";
+"Yazılı ifadeler oluşturabiliyorum" = "I can write expressions";
+"İleri gramer ve nüansa hakimim" = "I've mastered advanced grammar and nuance";
+"A1 • Harfler, sayılar ve ilk kelimeler" = "A1 • Letters, numbers and first words";
+"A2 • Selamlaşma, alışveriş ve günlük kelimeler" = "A2 • Greetings, shopping and everyday words";
+"B1+ • Podcast, dizi, film ve konuşmalar" = "B1+ • Podcasts, series, films and conversations";
+"B1+ • Kitap, makale ve uzun mesajlar" = "B1+ • Books, articles and long messages";
+"B1-B2 • Sohbet, karşılıklı konuşma, görüş" = "B1-B2 • Chat, dialogue, opinions";
+"B1+ • E-posta, kompozisyon, mesajlaşma" = "B1+ • Email, composition, messaging";
+"C1-C2 • Karmaşık yapı, nüans ve ileri ifade" = "C1-C2 • Complex structure, nuance and advanced expression";
+
+/* ===== Age range ===== */
+"Okul öncesi (3-5 yaş)" = "Preschool (ages 3-5)";
+"İlkokul (6-10 yaş)" = "Primary school (ages 6-10)";
+"Şarkı, hikaye ve görsellerle eğlenceli tanışma" = "A fun introduction with songs, stories and visuals";
+"Okul derslerine destek, oyun temelli aktiviteler" = "Support for school lessons, game-based activities";
+"Okul, sınav ve sosyal medya odaklı içerik" = "School, exam and social-media focused content";
+"Üniversite, iş başlangıcı ve yurtdışı için" = "For university, starting work and going abroad";
+"Kariyer, seyahat ve günlük hayat odaklı" = "Career, travel and daily-life focused";
+"Profesyonel iletişim, aile ve seyahat" = "Professional communication, family and travel";
+"Rahat tempo, kültür ve seyahat odaklı" = "Relaxed pace, culture and travel focused";
+
+/* ===== Learning purpose ===== */
+"Seyahat" = "Travel";
+"İş ve kariyer" = "Work and career";
+"Eğitim ve sınav" = "Education and exams";
+"Aile ve sosyal hayat" = "Family and social life";
+"Film, dizi, müzik" = "Films, series, music";
+"Kişisel gelişim" = "Personal growth";
+"Yurt dışı tatil ve gezilerde rahat iletişim" = "Easy communication on holidays and trips abroad";
+"İş hayatı, iş başvuruları, profesyonel iletişim" = "Work life, job applications, professional communication";
+"Okul, akademik çalışma, dil sınavları (TOEFL, IELTS)" = "School, academic study, language exams (TOEFL, IELTS)";
+"Sevdiklerimle ve arkadaşlarımla iletişim" = "Communicating with loved ones and friends";
+"Altyazısız film/dizi izle, şarkı sözlerini anla" = "Watch films/series without subtitles, understand the lyrics";
+"Hobi, kültür, beyin egzersizi" = "Hobby, culture, brain exercise";
+
+/* ===== Learning style ===== */
+"Kamera ile objeler" = "Objects with the camera";
+"Müzik ve şarkı sözleri" = "Music and lyrics";
+"Konuşma pratiği" = "Speaking practice";
+"Kısa günlük dersler" = "Short daily lessons";
+"AI açıklamalar" = "AI explanations";
+"Gördüğün objeleri kamerayla etiketle, kelime hazineni gerçek dünyadan büyüt" = "Label the objects you see with the camera and grow your vocabulary from the real world";
+"Sevdiğin şarkıların sözlerinden kelime ve günlük kalıpları öğren" = "Learn words and everyday phrases from the lyrics of songs you love";
+"Native telaffuz dinle, kendi sesini kaydet, akıcılığını geliştir" = "Listen to native pronunciation, record your own voice, improve your fluency";
+"Her gün 5-10 dakikalık kısa derslerle düzenli ritim oluştur" = "Build a steady rhythm with short 5-10 minute lessons every day";
+"Cümlelerini AI'a analiz ettir, hatalarını anında ve açık şekilde öğren" = "Have AI analyze your sentences and learn your mistakes instantly and clearly";
+
+/* ===== Daily goal ===== */
+"%lld dakika" = "%lld minutes";
+"Mikro alışkanlık • Hiç başlamamaktan iyi, ritim kurar" = "Micro habit • Better than never starting, builds rhythm";
+"İdeal denge • Meşgul günlerde bile sürdürülebilir tempo" = "Ideal balance • A sustainable pace even on busy days";
+"En verimli aralık • Konsantrasyon zirvesi, kalıcı öğrenme" = "Most effective range • Peak focus, lasting learning";
+"Hızlı ilerleme • 6 ayda ciddi sıçrama, en kısa yol" = "Fast progress • A serious leap in 6 months, the shortest path";
+
+/* ===== Lessons ===== */
 "Yeni kelime" = "New word";
 "Anladım" = "Got it";
 "Devam" = "Next";
@@ -14,10 +107,10 @@
 "Tekrar dene" = "Try again";
 "Kaydet" = "Save";
 
-/* Object labeling */
+/* ===== Object labeling ===== */
 "Objeleri öğren" = "Learn objects";
 "Fotoğraf seç" = "Choose a photo";
 
-/* Map / profile */
+/* ===== Map / profile ===== */
 "Profil" = "Profile";
 "Pratik yap" = "Practice";

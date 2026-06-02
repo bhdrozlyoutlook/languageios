@@ -318,8 +318,8 @@ private struct FloatingIcon: View {
 }
 
 private struct WelcomeBadge: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
 
     var body: some View {
         VStack(spacing: 2) {
@@ -338,7 +338,7 @@ private struct WelcomeBadge: View {
 }
 
 private struct LanguageSelectionStepView: View {
-    let title: String
+    let title: LocalizedStringKey
     let options: [TargetLanguage]
     let selected: TargetLanguage?
     var animatesSelection: Bool = true
@@ -414,7 +414,7 @@ private struct LevelMultiSelectStepView: View {
 }
 
 private struct SingleSelectionStepView<Option>: View where Option: Identifiable & Equatable {
-    let title: String
+    let title: LocalizedStringKey
     let options: [Option]
     let selected: Option?
     let titleProvider: KeyPath<Option, String>
