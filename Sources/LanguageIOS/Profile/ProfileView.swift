@@ -203,6 +203,9 @@ public struct ProfileView: View {
             )
             infoRow(icon: "checkmark.seal.fill", label: "Tamamlanan durak", value: "\(store.completedStopCount)")
             infoRow(icon: "star.fill", label: "Toplam yıldız", value: "\(store.totalStars)")
+            if store.capturedWordCount > 0 {
+                infoRow(icon: "camera.fill", label: "Yakalanan kelime", value: "\(store.capturedWordCount)")
+            }
         }
     }
 

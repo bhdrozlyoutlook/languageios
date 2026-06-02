@@ -130,6 +130,15 @@ public final class AppStore {
         persistGamification()
     }
 
+    /// Words captured via object labeling.
+    public var capturedWordCount: Int { gamification.capturedWords.count }
+
+    public func captureWord(_ english: String) {
+        gamification.capturedWords.insert(english)
+        persistGamification()
+        analytics.track(AnalyticsEvent(name: "object_word_captured", params: ["word": english]))
+    }
+
     // MARK: Profile & stats
 
     public var totalStars: Int { gamification.starsByStop.values.reduce(0, +) }

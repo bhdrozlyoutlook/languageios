@@ -15,6 +15,8 @@ public struct GamificationState: Codable, Equatable {
     public var missedWordIds: Set<String>
     /// Lessons/practices completed today, toward the daily goal. Resets each new day.
     public var activitiesToday: Int
+    /// English words the user captured via object labeling.
+    public var capturedWords: Set<String>
 
     public static let maxHearts = 5
     public static let heartRefillInterval: TimeInterval = 20 * 60 // 20 minutes
@@ -27,7 +29,8 @@ public struct GamificationState: Codable, Equatable {
         hearts: Int = GamificationState.maxHearts,
         heartsUpdatedAt: Date? = nil,
         missedWordIds: Set<String> = [],
-        activitiesToday: Int = 0
+        activitiesToday: Int = 0,
+        capturedWords: Set<String> = []
     ) {
         self.xp = xp
         self.streak = streak
@@ -37,6 +40,7 @@ public struct GamificationState: Codable, Equatable {
         self.heartsUpdatedAt = heartsUpdatedAt
         self.missedWordIds = missedWordIds
         self.activitiesToday = activitiesToday
+        self.capturedWords = capturedWords
     }
 
     // Backward-compatible decoding: `missedWordIds` is optional in stored data so older
@@ -51,6 +55,7 @@ public struct GamificationState: Codable, Equatable {
         heartsUpdatedAt = try container.decodeIfPresent(Date.self, forKey: .heartsUpdatedAt)
         missedWordIds = try container.decodeIfPresent(Set<String>.self, forKey: .missedWordIds) ?? []
         activitiesToday = try container.decodeIfPresent(Int.self, forKey: .activitiesToday) ?? 0
+        capturedWords = try container.decodeIfPresent(Set<String>.self, forKey: .capturedWords) ?? []
     }
 
     /// XP awarded for passing a lesson with the given stars.

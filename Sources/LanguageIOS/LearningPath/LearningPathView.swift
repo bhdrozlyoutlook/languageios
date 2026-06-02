@@ -12,6 +12,7 @@ public struct LearningPathView: View {
     @State private var activeLesson: ActiveLesson?
     @State private var showNoHearts = false
     @State private var showProfile = false
+    @State private var showObjects = false
 
     private enum ActiveLesson: Identifiable {
         case stop(LearningStop)
@@ -62,6 +63,15 @@ public struct LearningPathView: View {
             Text(noHeartsMessage)
         }
         .sheet(isPresented: $showProfile) { profileSheet }
+        .sheet(isPresented: $showObjects) { objectSheet }
+    }
+
+    private var objectSheet: some View {
+        ObjectLabelView(
+            speech: env.speech,
+            onCapture: { english, _ in store.captureWord(english) },
+            onClose: { showObjects = false }
+        )
     }
 
     private var profileSheet: some View {
@@ -174,6 +184,15 @@ public struct LearningPathView: View {
                 }
 
                 Spacer(minLength: 8)
+
+                Button { showObjects = true } label: {
+                    Image(systemName: "camera.viewfinder")
+                        .font(.title2)
+                        .foregroundStyle(MapTheme.ink)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(MapTheme.paper.opacity(0.9)))
+                }
+                .accessibilityLabel("Objeleri öğren")
 
                 Button { showProfile = true } label: {
                     Image(systemName: "person.crop.circle.fill")
