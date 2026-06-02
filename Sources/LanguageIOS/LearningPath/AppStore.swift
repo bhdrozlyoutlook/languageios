@@ -19,10 +19,16 @@ public final class AppStore {
     @ObservationIgnored private let gamificationRepo: GamificationRepository
     @ObservationIgnored private let notifications: NotificationScheduling
     @ObservationIgnored private let captureRepo: CaptureRepository
+    @ObservationIgnored private let entitlementRepo: EntitlementRepository
+    @ObservationIgnored private let purchases: PurchaseService
+    /// One owned calendar (ISO-8601, Monday weeks) threaded through every entitlement read
+    /// and write so the period boundary never disagrees between them.
+    @ObservationIgnored private let entitlementCalendar: Calendar
 
     private var progressByLanguage: [String: LearningProgress]
     private var gamification: GamificationState
     private var profile: UserProfile?
+    private var entitlement: EntitlementState
 
     public init(environment: AppEnvironment) {
         self.profiles = environment.profileRepository
@@ -34,12 +40,16 @@ public final class AppStore {
         self.gamificationRepo = environment.gamificationRepository
         self.notifications = environment.notifications
         self.captureRepo = environment.captureRepository
+        self.entitlementRepo = environment.entitlementRepository
+        self.purchases = environment.purchaseService
+        self.entitlementCalendar = Calendar(identifier: .iso8601)
 
         self.hasCompletedOnboarding = environment.settingsRepository.hasCompletedOnboarding
         self.targetLanguage = environment.settingsRepository.lastTargetLanguage
         self.progressByLanguage = environment.progressRepository.allProgress()
         self.gamification = environment.gamificationRepository.load()
         self.profile = environment.profileRepository.loadProfile()
+        self.entitlement = environment.entitlementRepository.load()
     }
 
     /// Convenience back-compat initializer: builds a live environment over the given
@@ -105,12 +115,14 @@ public final class AppStore {
         progressByLanguage = [:]
         gamification = GamificationState()
         profile = nil
+        entitlement = EntitlementState()
         do {
             try settings.setOnboardingCompleted(false)
             try settings.setLastTargetLanguage(nil)
             try progressRepo.resetAll()
             try profiles.clear()
             try gamificationRepo.clear()
+            try entitlementRepo.clear()
         } catch {
             handle(error, context: "resetAll", fallbackKey: PersistenceSchema.settingsKey)
         }
@@ -174,6 +186,116 @@ public final class AppStore {
 
     public func removeCapturedObject(id: String) {
         captureRepo.remove(id: id)
+    }
+
+    // MARK: Entitlement (photo-word learning quota + tokens)
+
+    public var isPremium: Bool { entitlement.tier == .premium }
+    public var tokenBalance: Int { entitlement.tokenBalance }
+    /// Free analyses granted each period: 10 (premium) / 0 (freemium).
+    public var photoQuotaLimit: Int { entitlement.freeQuota }
+
+    public func photoQuotaRemaining(now: Date = Date()) -> Int {
+        entitlement.freeAnalysesRemaining(now: now, calendar: entitlementCalendar)
+    }
+
+    public func canCapturePhoto(now: Date = Date()) -> Bool {
+        entitlement.canStartAnalysis(now: now, calendar: entitlementCalendar)
+    }
+
+    /// "haftaki" / "aydaki" for period-aware copy.
+    public func currentPeriodWord() -> String {
+        let value: String.LocalizationValue = entitlement.period == .weekly ? "haftaki" : "aydaki"
+        return String(localized: value)
+    }
+
+    public func tokenPackages() -> [PurchaseProductInfo] {
+        PurchaseProductInfo.placeholderCatalog().filter { if case .tokens = $0.product { return true } else { return false } }
+    }
+
+    public func premiumPlans() -> [PurchaseProductInfo] {
+        PurchaseProductInfo.placeholderCatalog().filter { if case .premium = $0.product { return true } else { return false } }
+    }
+
+    /// Spends one analysis right before the photo is sent to Gemini. Returns what was
+    /// charged, or `nil` if nothing is available (caller must not proceed).
+    @discardableResult
+    public func consumePhotoQuota(now: Date = Date()) -> AnalysisCharge? {
+        guard let charge = entitlement.consumeAnalysis(now: now, calendar: entitlementCalendar) else {
+            return nil
+        }
+        persistEntitlement()
+        analytics.track(EntitlementAnalytics.analysisConsumed(
+            charge: charge,
+            freeLeft: photoQuotaRemaining(now: now),
+            tokens: entitlement.tokenBalance
+        ))
+        return charge
+    }
+
+    /// Returns a charged unit when the Gemini call failed or was cancelled.
+    public func refundPhotoQuota(_ charge: AnalysisCharge) {
+        entitlement.refundAnalysis(charge)
+        persistEntitlement()
+        analytics.track(EntitlementAnalytics.analysisRefunded(charge: charge))
+    }
+
+    // MARK: Purchases (local now; StoreKit later)
+
+    public func loadProducts() async -> [PurchaseProductInfo] {
+        await purchases.products()
+    }
+
+    public func purchasePremium(_ period: RenewalPeriod, now: Date = Date()) async {
+        analytics.track(EntitlementAnalytics.purchaseStarted(product: PurchaseProduct.premium(period)))
+        await applyOutcome(purchases.purchasePremium(period: period, now: now), now: now)
+    }
+
+    public func buyTokens(_ pack: TokenPack, now: Date = Date()) async {
+        analytics.track(EntitlementAnalytics.purchaseStarted(product: PurchaseProduct.tokens(pack)))
+        await applyOutcome(purchases.buyTokens(pack: pack, now: now), now: now)
+    }
+
+    public func restorePurchases(now: Date = Date()) async {
+        await applyOutcome(purchases.restore(now: now), now: now)
+        analytics.track(EntitlementAnalytics.restore())
+    }
+
+    /// At launch, reconcile the (local) subscription standing: drop premium if it expired,
+    /// keeping the token balance intact.
+    public func reconcileEntitlements(now: Date = Date()) async {
+        let status = await purchases.subscriptionStatus(now: now)
+        if let status, status.isActive(now: now) {
+            if entitlement.tier != .premium || entitlement.period != status.period {
+                entitlement.setTier(.premium, period: status.period, now: now, calendar: entitlementCalendar)
+                persistEntitlement()
+            }
+        } else if entitlement.tier == .premium {
+            entitlement.setTier(.freemium, period: entitlement.period, now: now, calendar: entitlementCalendar)
+            persistEntitlement()
+        }
+    }
+
+    private func applyOutcome(_ outcome: PurchaseOutcome, now: Date) async {
+        guard case .success(let grants) = outcome else { return } // cancelled/pending/failed grant nothing
+        for grant in grants {
+            switch grant.kind {
+            case .premium(let period, _):
+                entitlement.setTier(.premium, period: period, now: now, calendar: entitlementCalendar)
+            case .tokens(let count):
+                entitlement.addTokens(count)
+            }
+            analytics.track(EntitlementAnalytics.purchaseSucceeded(grant: grant))
+        }
+        if !grants.isEmpty { persistEntitlement() }
+    }
+
+    private func persistEntitlement() {
+        do {
+            try entitlementRepo.save(entitlement)
+        } catch {
+            handle(error, context: "persistEntitlement", fallbackKey: PersistenceSchema.entitlementKey)
+        }
     }
 
     // MARK: Account (local, offline-first)

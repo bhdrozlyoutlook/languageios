@@ -243,4 +243,71 @@ final class EntitlementTests: XCTestCase {
         guard case .success(let none) = await reopened.restore(now: date(2026, 3, 1)) else { return XCTFail() }
         XCTAssertTrue(none.isEmpty) // expired -> nothing to restore
     }
+
+    // MARK: AppStore integration
+
+    private func premiumStore(_ store: InMemoryKeyValueStore, now: Date) async -> AppStore {
+        let purchases = LocalPurchaseService(store: store, logger: NoopLogger(), calendar: cal())
+        let app = AppStore(environment: makeTestEnvironment(store: store, purchaseService: purchases))
+        await app.purchasePremium(.weekly, now: now)
+        return app
+    }
+
+    func testAppStorePurchasePremiumFlipsTierAndQuota() async {
+        let now = date(2026, 1, 7)
+        let app = await premiumStore(InMemoryKeyValueStore(), now: now)
+        XCTAssertTrue(app.isPremium)
+        XCTAssertEqual(app.photoQuotaLimit, 10)
+        XCTAssertEqual(app.photoQuotaRemaining(now: now), 10)
+    }
+
+    func testAppStoreConsumePersistsAndRefundRestores() async {
+        let now = date(2026, 1, 7)
+        let store = InMemoryKeyValueStore()
+        let app = await premiumStore(store, now: now)
+
+        let charge = app.consumePhotoQuota(now: now)
+        XCTAssertEqual(charge, .freeQuota)
+        XCTAssertEqual(app.photoQuotaRemaining(now: now), 9)
+
+        // Survives a fresh AppStore over the same store.
+        let reopened = AppStore(environment: makeTestEnvironment(store: store))
+        XCTAssertEqual(reopened.photoQuotaRemaining(now: now), 9)
+        XCTAssertTrue(reopened.isPremium)
+
+        app.refundPhotoQuota(charge!)
+        XCTAssertEqual(app.photoQuotaRemaining(now: now), 10)
+    }
+
+    func testAppStoreFreemiumCannotCaptureUntilTokensBought() async {
+        let now = date(2026, 1, 7)
+        let store = InMemoryKeyValueStore()
+        let purchases = LocalPurchaseService(store: store, logger: NoopLogger(), calendar: cal())
+        let app = AppStore(environment: makeTestEnvironment(store: store, purchaseService: purchases))
+
+        XCTAssertFalse(app.isPremium)
+        XCTAssertFalse(app.canCapturePhoto(now: now)) // freemium, 0 quota, 0 tokens
+        XCTAssertNil(app.consumePhotoQuota(now: now))
+
+        await app.buyTokens(.ten, now: now)
+        XCTAssertEqual(app.tokenBalance, 10)
+        XCTAssertTrue(app.canCapturePhoto(now: now))
+        XCTAssertEqual(app.consumePhotoQuota(now: now), .token)
+        XCTAssertEqual(app.tokenBalance, 9)
+
+        // Tokens carry over across reload (no premium needed).
+        let reopened = AppStore(environment: makeTestEnvironment(store: store))
+        XCTAssertEqual(reopened.tokenBalance, 9)
+    }
+
+    func testAppStoreResetAllClearsEntitlement() async {
+        let now = date(2026, 1, 7)
+        let store = InMemoryKeyValueStore()
+        let app = await premiumStore(store, now: now)
+        await app.buyTokens(.ten, now: now)
+        app.resetAll()
+        XCTAssertFalse(app.isPremium)
+        XCTAssertEqual(app.tokenBalance, 0)
+        XCTAssertEqual(AppStore(environment: makeTestEnvironment(store: store)).tokenBalance, 0)
+    }
 }

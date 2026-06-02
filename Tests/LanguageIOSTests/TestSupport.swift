@@ -39,7 +39,8 @@ final class SpyNotificationScheduler: NotificationScheduling {
 func makeTestEnvironment(
     analytics: AnalyticsService = NoopAnalyticsService(),
     store: KeyValueStore = InMemoryKeyValueStore(),
-    notifications: NotificationScheduling = NoopNotificationScheduler()
+    notifications: NotificationScheduling = NoopNotificationScheduler(),
+    purchaseService: PurchaseService = NoopPurchaseService()
 ) -> AppEnvironment {
     let logger = NoopLogger()
     return AppEnvironment(
@@ -53,7 +54,9 @@ func makeTestEnvironment(
         gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
         notifications: notifications,
         speech: NoopSpeechService(),
-        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
+        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore()),
+        entitlementRepository: UserDefaultsEntitlementRepository(store: store, logger: logger),
+        purchaseService: purchaseService
     )
 }
 
@@ -71,6 +74,7 @@ func makeFailingProfileEnvironment() -> AppEnvironment {
         gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
         notifications: NoopNotificationScheduler(),
         speech: NoopSpeechService(),
-        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
+        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore()),
+        entitlementRepository: UserDefaultsEntitlementRepository(store: store, logger: logger)
     )
 }

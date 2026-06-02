@@ -104,6 +104,7 @@ private func makeProfileCountingEnvironment(_ profiles: ProfileRepository) -> Ap
         gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
         notifications: NoopNotificationScheduler(),
         speech: NoopSpeechService(),
-        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
+        captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore()),
+        entitlementRepository: UserDefaultsEntitlementRepository(store: store, logger: logger)
     )
 }

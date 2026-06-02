@@ -15,6 +15,8 @@ public struct AppEnvironment {
     public let notifications: NotificationScheduling
     public let speech: SpeechService
     public let captureRepository: CaptureRepository
+    public let entitlementRepository: EntitlementRepository
+    public let purchaseService: PurchaseService
     public let objectRecognizer: ObjectRecognizing
     public let sentenceAnalyzer: SentenceAnalyzing
 
@@ -30,6 +32,8 @@ public struct AppEnvironment {
         notifications: NotificationScheduling,
         speech: SpeechService,
         captureRepository: CaptureRepository,
+        entitlementRepository: EntitlementRepository,
+        purchaseService: PurchaseService = NoopPurchaseService(),
         objectRecognizer: ObjectRecognizing = LazyObjectRecognizer { GeminiObjectRecognizer(apiKey: "") },
         sentenceAnalyzer: SentenceAnalyzing = HeuristicSentenceAnalyzer()
     ) {
@@ -44,6 +48,8 @@ public struct AppEnvironment {
         self.notifications = notifications
         self.speech = speech
         self.captureRepository = captureRepository
+        self.entitlementRepository = entitlementRepository
+        self.purchaseService = purchaseService
         self.objectRecognizer = objectRecognizer
         self.sentenceAnalyzer = sentenceAnalyzer
     }
@@ -92,9 +98,17 @@ public extension AppEnvironment {
                 blobs: FileImageBlobStore() ?? InMemoryImageBlobStore(),
                 logger: logger
             ),
+            entitlementRepository: UserDefaultsEntitlementRepository(store: store, logger: logger),
+            purchaseService: makePurchaseService(store: store, logger: logger),
             objectRecognizer: makeObjectRecognizer(),
             sentenceAnalyzer: makeSentenceAnalyzer()
         )
+    }
+
+    /// Local purchases now (no payment); flips to `StoreKit2PurchaseService` behind a build
+    /// flag once App Store Connect product IDs exist — the only line that changes.
+    private static func makePurchaseService(store: KeyValueStore, logger: AppLogging) -> PurchaseService {
+        LocalPurchaseService(store: store, logger: logger, calendar: Calendar(identifier: .iso8601))
     }
 
     /// Uses Gemini for object identification. Missing keys or network failures return no
@@ -125,7 +139,9 @@ public extension AppEnvironment {
             gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
             notifications: NoopNotificationScheduler(),
             speech: NoopSpeechService(),
-            captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore())
+            captureRepository: DefaultCaptureRepository(store: store, blobs: InMemoryImageBlobStore()),
+            entitlementRepository: UserDefaultsEntitlementRepository(store: store, logger: logger),
+            purchaseService: NoopPurchaseService()
         )
     }
 }

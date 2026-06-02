@@ -1,5 +1,39 @@
 import Foundation
 
+/// Entitlement / monetization events for photo-word learning.
+public enum EntitlementAnalytics {
+    private static func chargeName(_ charge: AnalysisCharge) -> String {
+        charge == .freeQuota ? "free_quota" : "token"
+    }
+
+    public static func analysisConsumed(charge: AnalysisCharge, freeLeft: Int, tokens: Int) -> AnalyticsEvent {
+        AnalyticsEvent(name: "analysis_consumed", params: [
+            "charge": chargeName(charge), "free_left": String(freeLeft), "tokens": String(tokens),
+        ])
+    }
+
+    public static func analysisRefunded(charge: AnalysisCharge) -> AnalyticsEvent {
+        AnalyticsEvent(name: "analysis_refunded", params: ["charge": chargeName(charge)])
+    }
+
+    public static func purchaseStarted(product: PurchaseProduct) -> AnalyticsEvent {
+        AnalyticsEvent(name: "purchase_started", params: ["product": product.productID])
+    }
+
+    public static func purchaseSucceeded(grant: PurchaseGrant) -> AnalyticsEvent {
+        let detail: String
+        switch grant.kind {
+        case .premium(let period, _): detail = "premium.\(period.rawValue)"
+        case .tokens(let count): detail = "tokens.\(count)"
+        }
+        return AnalyticsEvent(name: "purchase_succeeded", params: ["grant": detail, "transaction": grant.transactionID])
+    }
+
+    public static func restore() -> AnalyticsEvent {
+        AnalyticsEvent(name: "purchases_restored")
+    }
+}
+
 /// Typed analytics taxonomy — all event names live here (snake_case), so call sites are
 /// type-safe and the catalog is the single source of truth for the funnel.
 public enum OnboardingFunnel {

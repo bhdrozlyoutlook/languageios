@@ -16,6 +16,7 @@ public struct RootView: View {
     public var body: some View {
         content
         .environment(\.appEnvironment, environment)
+        .task { await store.reconcileEntitlements() }
         .onAppear { environment.crashReporter.recordBreadcrumb("app launched", category: .app) }
         .alert(
             "Hata",
