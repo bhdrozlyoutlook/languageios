@@ -66,13 +66,15 @@ public final class GeminiObjectRecognizer: ObjectRecognizing {
 
     static func prompt(target: TargetLanguage, native: TargetLanguage) -> String {
         """
-        Identify the single most prominent physical object in this image for a \
-        \(native.englishName) speaker learning \(target.englishName).
+        This image is a centred crop from a camera viewfinder. Identify the ONE physical \
+        object at the centre of the frame that the user is pointing at — it may be small or \
+        far away. Ignore the background, the surface it rests on, and other objects around \
+        the edges. Teach it to a \(native.englishName) speaker learning \(target.englishName).
         Respond ONLY with a JSON object, no markdown, using lowercase singular nouns:
-        {"word": "<object name in \(target.englishName)>", \
-        "english": "<object name in English>", \
-        "native": "<object name in \(native.englishName)>"}
-        If there is no clear single object, respond {"word": ""}.
+        {"word": "<centre object's name in \(target.englishName)>", \
+        "english": "<centre object's name in English>", \
+        "native": "<centre object's name in \(native.englishName)>"}
+        If there is no clear object in the centre, respond {"word": ""}.
         """
     }
 
