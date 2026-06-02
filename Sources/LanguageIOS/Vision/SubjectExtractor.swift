@@ -63,20 +63,23 @@ public final class VisionSubjectExtractor: SubjectExtracting {
         let instances = observation.allInstances
         guard instances.count > 1 else { return instances }
 
-        var best = instances.first!
-        var bestScore = Double.infinity   // lower = better (distance to centre)
+        // Measure every instance, then drop tiny specks (relative to the largest) and pick
+        // the most central of what remains — the object the user framed in the reticle.
+        var measured: [(index: Int, distance: Double, area: Double)] = []
         for index in instances {
             guard let mask = try? observation.generateScaledMaskForImage(
                 forInstances: IndexSet(integer: index),
                 from: handler
             ), let m = Self.metrics(of: mask) else { continue }
-            let score = m.distanceToCentre - min(m.area, 0.25) * 0.5
-            if score < bestScore {
-                bestScore = score
-                best = index
-            }
+            measured.append((index, m.distanceToCentre, m.area))
         }
-        return IndexSet(integer: best)
+        guard !measured.isEmpty else { return instances }
+
+        let maxArea = measured.map(\.area).max() ?? 0
+        let significant = measured.filter { $0.area >= maxArea * 0.18 }
+        let pool = significant.isEmpty ? measured : significant
+        let best = pool.min { $0.distance < $1.distance } ?? measured[0]
+        return IndexSet(integer: best.index)
     }
 
     /// Centroid distance-to-centre (0…~0.7) and area fraction (0…1) of a single-channel

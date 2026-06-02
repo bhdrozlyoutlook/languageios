@@ -102,9 +102,11 @@ public extension AppEnvironment {
     private static func makeObjectRecognizer() -> ObjectRecognizing {
         LazyObjectRecognizer {
             let key = Secrets.geminiAPIKey
-            let local = OnDeviceObjectRecognizer()
-            guard !key.isEmpty else { return local }
-            return FastObjectRecognizer(local: local, remote: GeminiObjectRecognizer(apiKey: key, fallback: nil))
+            guard !key.isEmpty else { return OnDeviceObjectRecognizer() }
+            // Gemini first: it identifies the actual object (not a generic on-device guess
+            // like "table" for a cup) and honours the regional variant (American vs British
+            // English). On-device is only the offline fallback when the network call fails.
+            return GeminiObjectRecognizer(apiKey: key, fallback: OnDeviceObjectRecognizer())
         }
     }
 
