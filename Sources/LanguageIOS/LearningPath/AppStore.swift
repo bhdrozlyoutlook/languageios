@@ -78,6 +78,8 @@ public final class AppStore {
         } catch {
             handle(error, context: "completeOnboarding", fallbackKey: PersistenceSchema.profileKey)
         }
+        // Switch the UI to the chosen native language for the rest of the app.
+        AppLanguage.apply(userProfile.nativeLanguage)
         crashReporter.recordBreadcrumb("onboarding completed", category: .onboarding)
         analytics.track(OnboardingFunnel.completed(userProfile))
     }

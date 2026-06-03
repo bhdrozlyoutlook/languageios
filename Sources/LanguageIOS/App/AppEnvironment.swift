@@ -86,12 +86,16 @@ public extension AppEnvironment {
         speech = NoopSpeechService()
         #endif
 
+        // Switch the UI to the learner's native language before the first frame renders.
+        let profileRepository = UserDefaultsProfileRepository(store: store, logger: logger)
+        AppLanguage.apply(profileRepository.loadProfile()?.nativeLanguage)
+
         return AppEnvironment(
             analytics: MultiplexAnalyticsService([ConsoleAnalyticsService(logger: logger)]),
             logger: logger,
             performance: performance,
             crashReporter: crashReporter,
-            profileRepository: UserDefaultsProfileRepository(store: store, logger: logger),
+            profileRepository: profileRepository,
             progressRepository: UserDefaultsProgressRepository(store: store, logger: logger),
             settingsRepository: UserDefaultsSettingsRepository(store: store, logger: logger),
             gamificationRepository: UserDefaultsGamificationRepository(store: store, logger: logger),
